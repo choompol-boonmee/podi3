@@ -1,0 +1,76 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group 'popdig'
+version '1.0'
+
+jar {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    archiveBaseName = 'popdig'
+    archiveVersion = '1.1.0'
+    manifest {
+        attributes(
+                'Main-Class': 'popdig.App'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+jar.doLast {
+//    copy { from 'build/libs/${archiveBaseName}-${archiveVersion}.jar' into "../work/bin/" }
+    copy { from 'build/libs/popdig-1.1.0.jar' into "../work/bin/" }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation group: 'org.apache.jena', name: 'jena-core', version: '3.17.0'
+    implementation group: 'org.apache.jena', name: 'jena-arq', version: '3.17.0'
+    implementation group: 'org.apache.jena', name: 'jena-iri', version: '3.17.0'
+    implementation group: 'com.google.guava', name: 'guava', version: 'r05'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
+    implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.1.2'
+    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.1.1'
+    implementation group: 'com.fifesoft', name: 'rstaui', version: '3.1.1'
+    implementation group: 'javax.mail', name: 'javax.mail-api', version: '1.6.2'
+    implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
+    implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.23'
+
+    implementation group: 'org.dom4j', name: 'dom4j', version: '2.1.0'
+
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.2'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.17.2'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.17.2'
+
+	implementation group: 'com.google.zxing', name: 'core', version: '3.5.0'
+	implementation group: 'com.google.zxing', name: 'javase', version: '3.3.0'
+	implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.22'
+
+    implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.1'
+    implementation group: 'io.undertow', name: 'undertow-core', version: '2.2.12.Final'
+    implementation group: 'io.undertow', name: 'undertow-servlet', version: '2.2.12.Final'
+
+//  implementation group: 'org.apache.xml.security', name: 'xml-security', version: '1.4.1'
+
+    implementation group: 'org.apache.santuario', name: 'xmlsec', version: '2.3.0'
+    implementation group: 'org.keycloak', name: 'keycloak-saml-core', version: '15.0.2'
+
+	implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.3'
+
+    testImplementation'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testImplementation 'org.assertj:assertj-core:3.20.2'
+}
+
+
