@@ -45,6 +45,7 @@ public class WebServer {
 	static Logger log = Logger.getLogger(WebServer.class);
 
 	SimpleDateFormat datefm = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS");
+	SimpleDateFormat datetm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	String ht2 = 
 		"<head>\n"+
@@ -73,6 +74,9 @@ public class WebServer {
 		"  <input type='email' id='email' name='email' placeholder='Email address' required>\n"+
 		"  <small>We'll never share your email with anyone else.</small>\n"+
 		"  <button type='submit'>ลงทะเบียน</button>\n"+
+					"<div>\n"+
+					"<a href='/'>กลับสู่หน้าหลัก</a>\n"+
+					"</div>\n"+
 		"</form>\n"+
 		"<hr>\n"+
 		"</body>\n"+
@@ -113,6 +117,8 @@ public class WebServer {
 			final FormDataParser formDataParser = builder.build().createParser(ex);
 			if (formDataParser == null) {
 System.out.println("no form data");
+				ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+				ex.getResponseSender().send(ht2);
 			} else {
 System.out.println("form data");
 				ex.startBlocking();
@@ -133,11 +139,43 @@ System.out.println("form data");
 					}
 				}
 				if(name!=null && org!=null && email!=null) {
+					String semi = "https://cim.tueng.org/seminar-join.html";
 					final String sub = "ตอบรับลงทะเบียนเข้าร่วมการสัมมนา CIM Study Forum";
-					final String msg = "ตอบรับลงทะเบียนเข้าร่วมการสัมมนา CIM Study Forum\n"
-						+"ชื่อผู้เข้าร่วม: "+ name +"\n"
-						+"หน่วยงาน : "+ org + "\n"
-						+"EMAIL : "+ email + "\n";
+					final String msg = "ตอบรับลงทะเบียนเข้าร่วมการสัมมนา CIM Study Forum\n"+
+						"ชื่อผู้เข้าร่วม: "+ name +"\n"+
+						"หน่วยงาน : "+ org + "\n"+
+						"EMAIL : "+ email + "\n"+
+						"ลิงค์เข้าสัมมนา : "+ semi +"\n"+
+					"";
+
+					String ts = datefm.format(Calendar.getInstance().getTime());
+					String rdf = ""+
+						"@prefix csf: <http://popiang.com/rdf/subscribe#> .\n"+
+						"@prefix vo: <http://popiang.com/rdf/vo#> .\n"+
+						"@prefix vp: <http://popiang.com/rdf/vp#> .\n"+
+						"\n"+
+						"csf:"+ts+" a vo:Subscribe ; \n"+
+						"vp:name '"+ name + "' ; \n"+
+						"vp:org '"+ org + "' ; \n"+
+						"vp:email '"+ email +"' ; \n"+
+						"vp:time '"+ datetm.format(Calendar.getInstance().getTime())+"' ; \n"+
+						"vp:desc '''\n"+
+						"''' .\n"+
+					"";
+					String surv = getSurveyDir()+"subscribe/";
+					File fsurv = new File(surv);
+					if(!fsurv.exists()) fsurv.mkdirs();
+					String fn = surv+"subscribe-"+ts+".rdf";
+					Path psub = Path.of(fn);
+					try {
+						Files.writeString(psub, rdf, StandardOpenOption.CREATE);
+					} catch(Exception z) {
+						z.printStackTrace();
+					}
+System.out.println(surv);
+System.out.println(fn);
+System.out.println(rdf);
+
 					final Hashtable<String,List<String>> hsText = new Hashtable<>();
 					int cnt = getCount();
 					final String em=email, sb=sub, ms=msg;
@@ -147,9 +185,25 @@ System.out.println("form data");
 							PopiangDigital.email.sendMail(em, sb, ms, hsText);
 						}} .start();
 				}
+				String rt1 = 
+					"<head>\n"+
+					"<title>ขอบคุณที่ลงทะเบียนเข้าร่วมสัมมนา</title>\n"+
+					"<meta charset='UTF-8'>\n"+
+					"<meta name='viewport' content='width=device-width, initial-scale=1.0'>\n"+
+					"<link rel='stylesheet' href='https://unpkg.com/@picocss/pico@latest/css/pico.min.css'>\n"+
+					"</head>\n"+
+					"<body>\n"+
+					"<div>\n"+
+					"<h3>ขอบคุณที่ลงทะเบียนเข้าร่วมการสัมมนา CIM Study Forum</h3>\n"+
+					"ท่านจะได้รับอีเมล์ข้อมูลรายละเอียดเกี่ยวกับงานสัมมนา<br>\n"+
+					"</div>\n"+
+					"<div>\n"+
+					"<a href='/'>กลับสู่หน้าหลัก</a>\n"+
+					"</div>\n"+
+				"";
+				ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+				ex.getResponseSender().send(rt1);
 			}
-			ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
-			ex.getResponseSender().send(ht2);
 		}
 	};
 	//=============== Email subscription END =================
