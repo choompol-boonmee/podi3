@@ -25,6 +25,7 @@ jar {
 jar.doLast {
 //    copy { from 'build/libs/${archiveBaseName}-${archiveVersion}.jar' into "../work/bin/" }
     copy { from 'build/libs/popdig-1.1.0.jar' into "../work/bin/" }
+//    copy { from 'build/libs/popdig-1.1.0.jar' into "../init/bin/" }
 }
 
 repositories {

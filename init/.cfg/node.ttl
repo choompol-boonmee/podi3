@@ -1,0 +1,53 @@
+@prefix vp:     <http://popiang.com/rdf/voc-pred#> .
+@prefix vo:     <http://popiang.com/rdf/voc-obj#> .
+@prefix nd:     <http://popiang.com/rdf/node#> .
+
+nd:1        a           vo:PopiNode ;
+            vp:type     vo:MainNode ;
+            vp:owner    nd:2 ;
+            vp:prefix   'dnm' ;
+            vp:query    'qry' ;
+            vp:mainrep   'git@gitlab.com:dipwk0/work0.git' ;
+            vp:workrep   'git@gitlab.com:choompol-drnumnet/workdoc.git' ;
+            vp:baseiri   'http://popiang.com/rdf' ;
+			vp:channel  nd:3 ;
+#			vp:attend	nd:5 ;
+			vp:ps	'ps' ;
+			vp:pj	'pj' ;
+			vp:or	'or' ;
+			vp:macro	nd:5 ;
+			vp:gui		nd:4 ;
+			vp:survey	'dnm1B:22' ;
+			vp:webAddr	'0.0.0.0' ;
+			vp:webPort	6002 ;
+			vp:webdir	'pg' 
+.
+nd:2        a           vo:Person ;
+			vp:email    'drnum@tueng.org' ;
+			vp:name     'drnum'
+.
+nd:3        a           vo:RecvEmail ;
+#			vp:email    'work@tueng.org' ;
+#			vp:passwd   'Work-1234' ;
+
+#			vp:email    'dobiz.dga@tueng.org' ;
+#			vp:passwd   'Dobiz.dga-1234' ;
+
+			vp:email    'cimbot@tueng.org' ;
+			vp:passwd   'Cimbot-1234' ;
+
+			vp:imap     'mail.tueng.org' ;
+			vp:smtp     'mail.tueng.org' 
+.
+nd:4        a       vo:GuiSetting ;
+#            vp:fontName     'Cordia New' ;
+			vp:fontName     'Tahoma' ;
+			vp:fontSize     12
+.
+#nd:5		a			vo:Macro ;
+#			vp:memb		('com01:1' 'com01:2' 'com01:3')
+#.
+#nd:5		a		vo:Attend ;
+#			vp:id		'CHM0001'
+#.
+
