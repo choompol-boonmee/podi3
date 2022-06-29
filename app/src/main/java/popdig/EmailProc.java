@@ -858,6 +858,7 @@ while(keys.hasMoreElements()) {
 			}
 
 //			replyMessage.setSubject("RE: "+subj);
+System.out.println("reply: "+ subj);
 			replyMessage.setSubject(subj);
 			replyMessage.setReplyTo(aReplyTo);
 	
