@@ -243,8 +243,8 @@ System.out.println("form data");
 				}
 				if(name!=null && org!=null && email!=null) {
 					String semi = "https://cim.tueng.org/seminar-join.html";
-					final String sub = "ตอบรับลงทะเบียนเข้าร่วมการสัมมนา CIM Study Forum";
-					final String msg = "ตอบรับลงทะเบียนเข้าร่วมการสัมมนา CIM Study Forum\n"+
+					final String sub = "ตอบรับลงทะเบียนเข้าร่วมการสัมมนา";
+					final String msg = "ตอบรับลงทะเบียนเข้าร่วมการสัมมนา\n"+
 						"ชื่อผู้เข้าร่วม: "+ name +"\n"+
 						"หน่วยงาน : "+ org + "\n"+
 						"EMAIL : "+ email + "\n"+
