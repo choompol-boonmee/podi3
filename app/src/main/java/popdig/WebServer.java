@@ -58,7 +58,6 @@ public class WebServer {
 		"<div>\n"+
 		"<h3>ลงทะเบียนเข้าร่วมการสัมมนา CIM Study Forum</h3>\n"+
 		"หลังจากลงทะเบียนจะมีอีเมล์ส่งไปหาท่านพร้อมลิงค์เข้าร่วมงานสัมมนา<br>\n"+
-		"ผู้ลงทะเบียนเข้าร่วมงานสัมมนา จะได้สิทธิ์การเข้าถึงรายละเอียดข้อมูล มาตรฐาน IEC-CIM<br>\n"+
 		"</div>\n"+
 		"<hr>"+
 		"<form action='#' method='post' accept-charset='utf-8' enctype='multipart/form-data'>\n"+
@@ -209,6 +208,109 @@ System.out.println(rdf);
 	//=============== Email subscription END =================
 	//========================================================
 
+	//==================================================
+	//=============== Email survey BEGIN =========
+	HttpHandler survey = new HttpHandler() {
+		@Override
+		public void handleRequest(final HttpServerExchange ex) throws Exception {
+			if (ex.isInIoThread()) { ex.dispatch(this); return; }
+			String ddtt = datefm.format(Calendar.getInstance().getTime());
+			Builder builder = FormParserFactory.builder();
+			final FormDataParser formDataParser = builder.build().createParser(ex);
+			if (formDataParser == null) {
+System.out.println("no form data");
+				ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+				String ht3 = ht2.replace("CIM Study Forum", "DOING BUSINESS PORTAL");
+				ex.getResponseSender().send(ht3);
+			} else {
+System.out.println("form data");
+				ex.startBlocking();
+				FormData formData = formDataParser.parseBlocking();
+				String val = null, name=null, org=null, email=null;
+				for (String data : formData) {
+					val = null;
+					for (FormData.FormValue formValue : formData.get(data)) {
+						val = formValue.getValue();
+						val = toUTF8(val);
+					}
+					if("name".equals(data)) {
+						name = val;
+					} else if("org".equals(data)) {
+						org = val;
+					} else if("email".equals(data)) {
+						email = val;
+					}
+				}
+				if(name!=null && org!=null && email!=null) {
+					String semi = "https://cim.tueng.org/seminar-join.html";
+					final String sub = "ตอบรับลงทะเบียนเข้าร่วมการสัมมนา CIM Study Forum";
+					final String msg = "ตอบรับลงทะเบียนเข้าร่วมการสัมมนา CIM Study Forum\n"+
+						"ชื่อผู้เข้าร่วม: "+ name +"\n"+
+						"หน่วยงาน : "+ org + "\n"+
+						"EMAIL : "+ email + "\n"+
+						"ลิงค์เข้าสัมมนา : "+ semi +"\n"+
+					"";
+
+					String ts = datefm.format(Calendar.getInstance().getTime());
+					String rdf = ""+
+						"@prefix csf: <http://popiang.com/rdf/subscribe#> .\n"+
+						"@prefix vo: <http://popiang.com/rdf/vo#> .\n"+
+						"@prefix vp: <http://popiang.com/rdf/vp#> .\n"+
+						"\n"+
+						"csf:"+ts+" a vo:Subscribe ; \n"+
+						"vp:name '"+ name + "' ; \n"+
+						"vp:org '"+ org + "' ; \n"+
+						"vp:email '"+ email +"' ; \n"+
+						"vp:time '"+ datetm.format(Calendar.getInstance().getTime())+"' ; \n"+
+						"vp:desc '''\n"+
+						"''' .\n"+
+					"";
+					String surv = getSurveyDir()+"subscribe/";
+					File fsurv = new File(surv);
+					if(!fsurv.exists()) fsurv.mkdirs();
+					String fn = surv+"subscribe-"+ts+".rdf";
+					Path psub = Path.of(fn);
+					try {
+						Files.writeString(psub, rdf, StandardOpenOption.CREATE);
+					} catch(Exception z) {
+						z.printStackTrace();
+					}
+System.out.println(surv);
+System.out.println(fn);
+System.out.println(rdf);
+
+					final Hashtable<String,List<String>> hsText = new Hashtable<>();
+					int cnt = getCount();
+					final String em=email, sb=sub, ms=msg;
+					new Thread() {
+						@Override
+						public void run() {
+							PopiangDigital.email.sendMail(em, sb, ms, hsText);
+						}} .start();
+				}
+				String rt1 = 
+					"<head>\n"+
+					"<title>ขอบคุณที่ลงทะเบียนเข้าร่วมสัมมนา</title>\n"+
+					"<meta charset='UTF-8'>\n"+
+					"<meta name='viewport' content='width=device-width, initial-scale=1.0'>\n"+
+					"<link rel='stylesheet' href='https://unpkg.com/@picocss/pico@latest/css/pico.min.css'>\n"+
+					"</head>\n"+
+					"<body>\n"+
+					"<div>\n"+
+					"<h3>ขอบคุณที่ลงทะเบียนเข้าร่วมการสัมมนา DOING BUSINESS PORTAL</h3>\n"+
+					"ท่านจะได้รับอีเมล์ข้อมูลรายละเอียดเกี่ยวกับงานสัมมนา<br>\n"+
+					"</div>\n"+
+					"<div>\n"+
+					"<a href='/'>กลับสู่หน้าหลัก</a>\n"+
+					"</div>\n"+
+				"";
+				ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+				ex.getResponseSender().send(rt1);
+			}
+		}
+	};
+	//=============== Email subscription END =================
+	//========================================================
 	HttpHandler upload = new HttpHandler() {
 
 		protected Session getSession(HttpServerExchange exchange) {
@@ -539,6 +641,7 @@ log.info("res: "+url);
 		path.addPrefixPath("/D", handa);
 		path.addPrefixPath("/fact", fact);
 		path.addPrefixPath("/subscribe", subscribe);
+		path.addPrefixPath("/survey", survey);
 		path.addPrefixPath("/res", resource(
 			new PathResourceManager(Paths.get(respath), 100))
 				.setDirectoryListingEnabled(true));
