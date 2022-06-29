@@ -181,7 +181,7 @@ System.out.println(rdf);
 					new Thread() {
 						@Override
 						public void run() {
-							PopiangDigital.email.sendMail(em, sb, ms, hsText);
+							PopiangDigital.email.sendEMail(em, sb, ms, hsText);
 						}} .start();
 				}
 				String rt1 = 

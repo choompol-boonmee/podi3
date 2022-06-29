@@ -828,6 +828,9 @@ while(keys.hasMoreElements()) {
 	}
 	
 	void sendMail(String replyTo, String subj, String replyMsg, Hashtable<String,List<String>> hsText) {
+		sendEMail(replyTo, "RE: "+subj, replyMsg, hsText);
+	}
+	void sendEMail(String replyTo, String subj, String replyMsg, Hashtable<String,List<String>> hsText) {
 		try {
 			String rto = ""+replyTo;
 			if(rto.indexOf("Delivery")>=0) return;
@@ -851,13 +854,11 @@ while(keys.hasMoreElements()) {
 
 			InternetAddress[] aReplyTo = new InternetAddress[emls.length];
 			for(int i=0; i<emls.length; i++) {
-//log.info("ADDR: "+ emls[i]);
 				aReplyTo[i] = new InternetAddress(emls[i]);
 			}
-//log.info("SEND: "+ emls.length);
-//			InternetAddress[] aReplyTo = { new InternetAddress(replyTo) };
 
-			replyMessage.setSubject("RE: "+subj);
+//			replyMessage.setSubject("RE: "+subj);
+			replyMessage.setSubject(subj);
 			replyMessage.setReplyTo(aReplyTo);
 	
 			String[] types = new String[] {"RRDF", "RZIP", "RPDF", "RXLS", "RJPG"};
@@ -868,15 +869,6 @@ while(keys.hasMoreElements()) {
 				aaReply.add(lst);
 				if(lst!=null) cnt += lst.size();
 			}
-/*
-			List<String> aReplyRdf = hsText.get("RRDF");
-			List<String> aReplyZip = hsText.get("RZIP");
-			List<String> aReplyPdf = hsText.get("RPDF");
-			List<String> aReplyXls = hsText.get("RXLS");
-			List<String> aReplyJpg = hsText.get("RJPG");
-			int cnt = aReplyRdf.size() + aReplyZip.size() + aReplyPdf.size() + aReplyXls.size()
-					+ aReplyJpg.size();
-*/
 			if(cnt==0) {
 				//System.out.println("   MSG: "+ replyMsg);
 				replyMessage.setContent(replyMsg, "text/plain; charset=utf-8");
@@ -896,41 +888,6 @@ while(keys.hasMoreElements()) {
 						mp1.addBodyPart(attachment1);
 					}
 				}
-/*
-				for(int j=0; aReplyRdf!=null && j<aReplyRdf.size(); j++) {
-					MimeBodyPart attachment1 = new MimeBodyPart();
-					String file = aReplyRdf.get(j);
-					attachment1.attachFile(file);
-					//System.out.println("ATTACH:"+ new File(file).length());
-					mp1.addBodyPart(attachment1);
-				}
-				for(int j=0; aReplyZip!=null && j<aReplyZip.size(); j++) {
-					MimeBodyPart attachment1 = new MimeBodyPart();
-					String file = aReplyZip.get(j);
-					attachment1.attachFile(file);
-					//System.out.println("ATTACH:"+ new File(file).length());
-					mp1.addBodyPart(attachment1);
-				}
-				for(int j=0; aReplyPdf!=null && j<aReplyPdf.size(); j++) {
-					MimeBodyPart attachment1 = new MimeBodyPart();
-					String file = aReplyPdf.get(j);
-					attachment1.attachFile(file);
-					//System.out.println("ATTACH:"+ new File(file).length());
-					mp1.addBodyPart(attachment1);
-				}
-				for(int j=0; aReplyXls!=null && j<aReplyXls.size(); j++) {
-					MimeBodyPart attachment1 = new MimeBodyPart();
-					String file = aReplyXls.get(j);
-					attachment1.attachFile(file);
-					mp1.addBodyPart(attachment1);
-				}
-				for(int j=0; aReplyJpg!=null && j<aReplyJpg.size(); j++) {
-					MimeBodyPart attachment1 = new MimeBodyPart();
-					String file = aReplyJpg.get(j);
-					attachment1.attachFile(file);
-					mp1.addBodyPart(attachment1);
-				}
-*/
 			}
 			Transport t = session.getTransport("smtp");
 			try {
