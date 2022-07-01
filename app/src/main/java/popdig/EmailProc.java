@@ -828,9 +828,6 @@ while(keys.hasMoreElements()) {
 	}
 	
 	void sendMail(String replyTo, String subj, String replyMsg, Hashtable<String,List<String>> hsText) {
-		sendEMail(replyTo, "RE: "+subj, replyMsg, hsText);
-	}
-	void sendEMail(String replyTo, String subj, String replyMsg, Hashtable<String,List<String>> hsText) {
 		try {
 			String rto = ""+replyTo;
 			if(rto.indexOf("Delivery")>=0) return;
@@ -859,6 +856,81 @@ while(keys.hasMoreElements()) {
 
 //			replyMessage.setSubject("RE: "+subj);
 System.out.println("reply: "+ subj);
+			replyMessage.setSubject(subj);
+			replyMessage.setReplyTo(aReplyTo);
+	
+			String[] types = new String[] {"RRDF", "RZIP", "RPDF", "RXLS", "RJPG"};
+			int cnt = 0;
+			List<List<String>> aaReply = new ArrayList<>();
+			for(int i=0; i<types.length; i++) {
+				List<String> lst = hsText.get(types[i]);
+				aaReply.add(lst);
+				if(lst!=null) cnt += lst.size();
+			}
+			if(cnt==0) {
+				//System.out.println("   MSG: "+ replyMsg);
+				replyMessage.setContent(replyMsg, "text/plain; charset=utf-8");
+			} else {
+	
+				Multipart mp1 = new MimeMultipart();
+				MimeBodyPart textPart = new MimeBodyPart();
+				textPart.setContent(replyMsg, "text/plain; charset=utf-8");
+				mp1.addBodyPart(textPart);
+				replyMessage.setContent(mp1);
+	
+				for(int i=0; i<aaReply.size(); i++) {
+					for(int j=0; aaReply.get(i)!=null && j<aaReply.get(i).size(); j++) {
+						MimeBodyPart attachment1 = new MimeBodyPart();
+						String file = aaReply.get(i).get(j);
+						attachment1.attachFile(file);
+						mp1.addBodyPart(attachment1);
+					}
+				}
+			}
+			Transport t = session.getTransport("smtp");
+			try {
+				t.connect(PopiangDigital.sRecvEmail, PopiangDigital.sPassWord);
+				t.sendMessage(replyMessage, aReplyTo);
+			} catch(Exception x) {
+				log.error("006", x);
+			} finally {
+				t.close();
+			}
+
+		} catch(Exception z) {
+			log.error("007", z);
+		}
+	}
+	void sendEMail(String replyTo, String subj, String replyMsg, Hashtable<String,List<String>> hsText) {
+		try {
+			String rto = ""+replyTo;
+			if(rto.indexOf("Delivery")>=0) return;
+			String[] emls = replyTo.split(",");
+			if(emls.length<=0) return;
+
+			replyTo = emls[0];
+
+			if(subj.startsWith("RE: ")) subj = subj.substring(4);
+			System.out.println("SEND TO "+replyTo+" with:"+subj);
+			Properties propSmtp = System.getProperties();
+			propSmtp.put("mail.smtp.host", PopiangDigital.sSmtp);
+			propSmtp.put("mail.smtp.socketFactory.port", "465");
+			propSmtp.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+			propSmtp.put("mail.smtp.ssl.trust", "*");
+			propSmtp.put("mail.smtp.auth", "true");
+			propSmtp.put("mail.smtp.port", "465");
+	
+			Session session = Session.getInstance(propSmtp);
+			MimeMessage replyMessage = new MimeMessage(session);
+			replyMessage.setFrom(new InternetAddress(PopiangDigital.sRecvEmail));
+
+			InternetAddress[] aReplyTo = new InternetAddress[emls.length];
+			for(int i=0; i<emls.length; i++) {
+				aReplyTo[i] = new InternetAddress(emls[i]);
+			}
+
+//			replyMessage.setSubject("RE: "+subj);
+//System.out.println("reply: "+ subj);
 			replyMessage.setSubject(subj);
 			replyMessage.setReplyTo(aReplyTo);
 	
