@@ -148,6 +148,7 @@ System.out.println("form data");
 					"";
 
 					String ts = datefm.format(Calendar.getInstance().getTime());
+					String dd = ts.substring(0,8);
 					String rdf = ""+
 						"@prefix csf: <http://popiang.com/rdf/subscribe#> .\n"+
 						"@prefix vo: <http://popiang.com/rdf/vo#> .\n"+
@@ -161,7 +162,7 @@ System.out.println("form data");
 						"vp:desc '''\n"+
 						"''' .\n"+
 					"";
-					String surv = getSurveyDir()+"subscribe/";
+					String surv = getSurveyDir()+"subscribe/"+dd+"/";
 					File fsurv = new File(surv);
 					if(!fsurv.exists()) fsurv.mkdirs();
 					String fn = surv+"subscribe-"+ts+".rdf";
