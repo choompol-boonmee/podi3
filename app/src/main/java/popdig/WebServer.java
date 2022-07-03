@@ -165,7 +165,8 @@ System.out.println("form data");
 					String surv = getSurveyDir()+"subscribe/"+dd+"/";
 					File fsurv = new File(surv);
 					if(!fsurv.exists()) fsurv.mkdirs();
-					String fn = surv+"subscribe-"+ts+".rdf";
+//					String fn = surv+"subscribe-"+ts+".rdf";
+					String fn = surv+"subscribe-"+ts+".txt";
 					Path psub = Path.of(fn);
 					try {
 						Files.writeString(psub, rdf, StandardOpenOption.CREATE);
@@ -270,7 +271,8 @@ System.out.println("form data");
 					String surv = getSurveyDir()+"subscribe/";
 					File fsurv = new File(surv);
 					if(!fsurv.exists()) fsurv.mkdirs();
-					String fn = surv+"subscribe-"+ts+".rdf";
+//					String fn = surv+"subscribe-"+ts+".rdf";
+					String fn = surv+"subscribe-"+ts+".txt";
 					Path psub = Path.of(fn);
 					try {
 						Files.writeString(psub, rdf, StandardOpenOption.CREATE);
