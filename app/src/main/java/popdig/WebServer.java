@@ -39,6 +39,9 @@ import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.stream.*;
+import java.util.Map.Entry;
 
 public class WebServer {
 
@@ -313,8 +316,68 @@ System.out.println(rdf);
 			}
 		}
 	};
-	//=============== Email subscription END =================
+	//=============== Email Survey END =================
 	//========================================================
+
+	HttpHandler subscribeList = new HttpHandler() {
+		String head = ""+
+			"<head>\n"+
+			"<title>Subscribe List</title>\n"+
+			"<meta charset='UTF-8'>\n"+
+			"<meta name='viewport' content='width=device-width, initial-scale=1.0'>\n"+
+			"<link rel='stylesheet' href='https://unpkg.com/@picocss/pico@latest/css/pico.classless.min.css'>\n"+
+			"</head>\n"+
+		"";
+		@Override
+		public void handleRequest(final HttpServerExchange ex) throws Exception {
+			StringBuffer pg = new StringBuffer();
+			pg.append("<html>");
+			pg.append(head);
+			pg.append("<body>");
+			String surv = getSurveyDir()+"subscribe/";
+			File fsurv = new File(surv);
+			String[] aDir = fsurv.list();
+			List<String> lDir = new ArrayList<>();
+			for(int i=0; i<aDir.length; i++) {
+				if(aDir[i].length()!=8) continue;
+				File fDir = new File(fsurv+"/"+aDir[i]);
+				if(!fDir.isDirectory()) continue;
+				lDir.add(aDir[i]);
+			}
+			String[] sDir = lDir.toArray(new String[lDir.size()]);
+			Arrays.sort(sDir);
+			Hashtable<String,String> hReg = new Hashtable<>();
+			for(int i=0; i<sDir.length; i++) {
+				File fDay = new File(fsurv+"/"+sDir[i]);
+				String[] regs = fDay.list();
+				for(int j=0; j<regs.length; j++) {
+					Path pth = Paths.get(surv, sDir[i], regs[j]);
+					if(!pth.toFile().exists()) continue;
+					Stream<String> sline = Files.lines(pth);
+					List<String> lLine = sline.collect(Collectors.toList());
+					if(lLine.size()<8) continue;
+					int i1,i2;
+					// 5:name 6:org 7:email 8:time
+					String name = lLine.get(5);
+					if((i1=name.indexOf("'"))>0 && (i2=name.indexOf("'",i1+2))>0) { name = name.substring(i1+1, i2); }
+					String org = lLine.get(6);
+					if((i1=org.indexOf("'"))>0 && (i2=org.indexOf("'",i1+2))>0) { org = org.substring(i1+1, i2); }
+					String mail = lLine.get(7);
+					if((i1=mail.indexOf("'"))>0 && (i2=mail.indexOf("'",i1+2))>0) { mail = mail.substring(i1+1, i2); }
+					
+					hReg.put(mail, name);
+				}
+			}
+			for(Entry<String,String> ent : hReg.entrySet()) {
+				pg.append("\n"+ent.getValue()+"&lt;"+ent.getKey()+"&gt;"+"<br>");
+			}
+
+			pg.append("</body></html>");
+			ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+			ex.getResponseSender().send(pg.toString());
+		}
+	};
+
 	HttpHandler upload = new HttpHandler() {
 
 		protected Session getSession(HttpServerExchange exchange) {
@@ -645,6 +708,7 @@ log.info("res: "+url);
 		path.addPrefixPath("/D", handa);
 		path.addPrefixPath("/fact", fact);
 		path.addPrefixPath("/subscribe", subscribe);
+		path.addPrefixPath("/subscribeList", subscribeList);
 		path.addPrefixPath("/survey", survey);
 		path.addPrefixPath("/res", resource(
 			new PathResourceManager(Paths.get(respath), 100))

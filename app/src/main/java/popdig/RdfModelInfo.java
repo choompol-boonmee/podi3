@@ -99,24 +99,17 @@ System.out.println("err1");
 					if((i5=wds[0].indexOf("Unresolved"))>0) {
 //System.out.println("UNRES: "+ i1+","+i2+"="+lno+","+ln+" i3:"+i3+","+i4);
 						ms = wds[0].substring(i5);
-/*
-						for(int i=0; i<wds.length; i++) {
-							System.out.println(i+": "+ wds[i]);
-						}
-*/
 					} else {
 						if(i1>0) { ms = wds[0].substring(0,i1).trim(); }
 						else { ms = wds[0]; }
-/*
-						for(int i=0; i<wds.length; i++) {
-							System.out.println(i+": "+ wds[i]);
-						}
-*/
 					}
 				}
 			}
 			return ln+","+cn+": "+ ms;
 		} catch(FileNotFoundException x) {
+			System.out.println("err2: "+ x);
+		} catch(org.apache.jena.riot.RiotException x) {
+			System.out.println("err3: "+ x);
 		}
 		return null;
 	}
