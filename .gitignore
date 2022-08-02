@@ -6,4 +6,5 @@ app/build
 build
 work
 .DS_Store
+*.swp
 
