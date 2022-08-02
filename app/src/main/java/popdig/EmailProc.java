@@ -96,10 +96,12 @@ public class EmailProc {
 			fBaseDir = new File(PopiangDigital.workDir+"/.eml");
 			if(!fBaseDir.exists()) fBaseDir.mkdirs();
 			fUser = new File(fBaseDir+"/memb");
-System.out.println("=============== Start Email:"+ PopiangDigital.sRecvEmail);
+System.out.println("===============1 Start Email:"+ PopiangDigital.sRecvEmail);
+System.out.println("start thread");
 			new Thread() { public void run() {
 				while(true) {
 					bImap = true;
+System.out.println("  imap fetch");
 					Thread fet = new Thread() { public void run() { imapFetchThread(); } };
 					Thread idl = new Thread() { public void run() { imapIdleThread(); } };
 					Thread prc = new Thread() { public void run() { procParseThread(); } };
@@ -117,7 +119,8 @@ System.out.println("=============== Start Email:"+ PopiangDigital.sRecvEmail);
 	public void imapFetchThread() {
 		int cnt = 0;
 		while(bImap) {
-log.info("ImapFetch: "+ ++cnt);
+System.out.println("  Imap "+ ++cnt);
+//log.info("ImapFetch: "+ ++cnt);
 			folder = getEmailFolder();
 			if(folder==null || !folder.isOpen()) {
 				try { Thread.sleep(5000); } catch(Exception y) {}
@@ -324,7 +327,7 @@ System.out.println("4.2 read msg");
 			propImap.put("mail.imaps.ssl.trust", "*");
 			Session session = Session.getInstance(propImap, null);
 			Store store = session.getStore("imap");
-//System.out.println("imap:"+imap+" em:"+email+" pw:"+pass);
+System.out.println("imap:"+PopiangDigital.sImap+" em:"+PopiangDigital.sRecvEmail+" pw:"+PopiangDigital.sPassWord);
 //			store.connect(imap, email, pass);
 			store.connect(PopiangDigital.sImap, PopiangDigital.sRecvEmail, PopiangDigital.sPassWord);
 			folder = (IMAPFolder) store.getFolder("Inbox");
@@ -337,7 +340,7 @@ System.out.println("4.2 read msg");
 			folder.open(Folder.READ_WRITE);
 		} catch(Exception x) {
 //			log.info(x);
-//			x.printStackTrace();
+			x.printStackTrace();
 			folder = null;
 		}
 		return folder;
@@ -1030,7 +1033,7 @@ System.out.println("reply: "+ subj);
 
 	Pattern empat = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$" , Pattern.CASE_INSENSITIVE);
 	String[] aTag = {"NAME","ENAME","STDID","MOBILE","SUBSCRIBE"};
-	String[] aVars = {"MSG","REPO","LAB","CLIP"};
+	String[] aVars = {"MSG","REPO","LAB","CLIP","KEY"};
 	String[] aStrmType = { "TXT","JPG","PNG","GIF","PDF","XLS","XML","HTM","JAR","ZIP" };
 	Map<String,String> mTag;
 

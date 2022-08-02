@@ -179,7 +179,7 @@ System.out.println("node init");
 	public static void setLogging() {
 		try {
 
-System.out.println("log ..1");
+//System.out.println("log ..1");
 			ConfigurationBuilder<BuiltConfiguration> builder
 				 = ConfigurationBuilderFactory.newConfigurationBuilder();
 			builder.setStatusLevel(Level.INFO);
@@ -192,7 +192,7 @@ System.out.println("log ..1");
 			console.add(lay);
 			builder.add(console);
 
-System.out.println("log ..2");
+//System.out.println("log ..2");
 			LayoutComponentBuilder layoutBuilder = builder.newLayout("PatternLayout")
 			    .addAttribute("pattern", "%d [%t] %-5level: %msg%n");
 			ComponentBuilder policy = builder.newComponent("Policies")
@@ -200,7 +200,7 @@ System.out.println("log ..2");
 					.addAttribute("interval", "1")
 					.addAttribute("modulate", "true"));
 
-System.out.println("log ..3");
+//System.out.println("log ..3");
 			AppenderComponentBuilder appenderBuilder = builder.newAppender("rolling", "RollingFile")
 			    .addAttribute("fileName", "${basePath}/rolling.log")
 			    .addAttribute("filePattern", "${basePath}/rolling-%d{MM-dd-yy}.log.gz")
@@ -208,7 +208,7 @@ System.out.println("log ..3");
 			    .addComponent(policy);
 			builder.add(appenderBuilder);
 
-System.out.println("log ..4");
+//System.out.println("log ..4");
 			RootLoggerComponentBuilder rootLogger = builder.newRootLogger(Level.INFO);
 			rootLogger.add(builder.newAppenderRef("console"));
 			rootLogger.add(builder.newAppenderRef("rolling"));
@@ -805,7 +805,6 @@ log.info("OWN-ORIGIN: "+ own);
 		RdfModelInfo rdfif = PopiangDigital.hRdfModelInfo.get(fnm);
 		if(rdfif==null) {
 			rdfif = new RdfModelInfo();
-//System.out.println("fnm: "+ fnm);
 			PopiangDigital.hRdfModelInfo.put(fnm, rdfif);
 		}
 		String r = rdfif.analyze(fMod);

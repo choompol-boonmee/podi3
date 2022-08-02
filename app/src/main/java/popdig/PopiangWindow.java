@@ -933,6 +933,7 @@ System.out.println("show children 7:");
 		new QueryAction(popMenu, tfinf, "Execute");
 		new AddRdfTitle(popMenu, tfinf, "Add Title");
 		new CopyTipToClibboard(popMenu, tfinf, "Copy Tip");
+		new FixThaiSpell(popMenu, tfinf, "Fix Thai");
 	}
 
 	TurtleTextArea newTurtleTextArea(TextFileInfo tfi) {
@@ -1750,7 +1751,7 @@ log.info("BASE: "+ PopiangDigital.sBaseIRI);
 				label.setText("OK");
 			}
 			tinf.text.setDirty(false);
-			log.info("SAVE FILE: "+ tinf.path);
+			log.info("SAVE FILEx: "+ tinf.path);
 		}
 	}
 
@@ -1984,6 +1985,7 @@ log.info("BASE: "+ PopiangDigital.sBaseIRI);
 		}
 	}
 
+/*
 	void fixMisSpell() {
 		int id = tabbedPane.getSelectedIndex();
 		if(id<0) return;
@@ -2071,6 +2073,7 @@ log.info("BASE: "+ PopiangDigital.sBaseIRI);
 		{"ถงึ","ถึง"},
 		{"คาสั่ง","คำสั่ง"},
 	};
+*/
 
     void makeAttendReport() {
         int id = tabbedPane.getSelectedIndex();
