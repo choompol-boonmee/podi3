@@ -934,6 +934,11 @@ System.out.println("show children 7:");
 		new AddRdfTitle(popMenu, tfinf, "Add Title");
 		new CopyTipToClibboard(popMenu, tfinf, "Copy Tip");
 		new FixThaiSpell(popMenu, tfinf, "Fix Thai");
+
+		popMenu.addSeparator();
+		popMenu.add(showFind);
+		popMenu.add(showReplace);
+		popMenu.add(gotoLine);
 	}
 
 	TurtleTextArea newTurtleTextArea(TextFileInfo tfi) {

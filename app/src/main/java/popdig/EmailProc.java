@@ -390,10 +390,12 @@ System.out.println("imap:"+PopiangDigital.sImap+" em:"+PopiangDigital.sRecvEmail
 			Object content = msg.getContent();
 			if(content instanceof Multipart) {
 				Multipart mp = (Multipart) content;
+System.out.println("2.---- multiple parts");
 				parseMultipart(mp, hsProp, hsText, hbStrm);
 			}
 			else if(content instanceof String) {
 				String txt = (String) content;
+System.out.println("1.--- String");
 				hsText.get("TXT").add(txt);
 /*
 			} else if(content instanceof BASE64DecoderStream) {
@@ -493,6 +495,7 @@ System.out.println("imap:"+PopiangDigital.sImap+" em:"+PopiangDigital.sRecvEmail
 					MimeBodyPart mime = (MimeBodyPart) part;
 					String type = mime.getContentType().toUpperCase();
 					len0 = 0;
+//System.out.println("type===="+type);
 					if(type.startsWith("TEXT/PLAIN")) {
 						InputStream is = mime.getInputStream();
 						String charset = getCharSet(type);
@@ -515,6 +518,7 @@ System.out.println("imap:"+PopiangDigital.sImap+" em:"+PopiangDigital.sRecvEmail
 								hsText.get("TXT").clear();
 								hsText.get("TXT").add(txt);
 							}
+//System.out.println("TEXT:>>> "+txt);
 						} catch(Exception z) {
 //							System.out.println("charset: "+ charset);
 //							z.printStackTrace();
@@ -539,6 +543,7 @@ System.out.println("imap:"+PopiangDigital.sImap+" em:"+PopiangDigital.sRecvEmail
 						if(hsText.get("TXT").size()==0)
 							hsText.get("TXT").add(html);
 
+//System.out.println("HTML:>>> "+html);
 						String txt = Jsoup.parse(html).text();
 						if(txt.length()>0) {
 							if(txt.startsWith("<div dir=")) {
@@ -990,6 +995,10 @@ System.out.println("reply: "+ subj);
 				txt = txt0.substring(0, ii).trim();
 				break;
 			}
+			if((ii=txt0.indexOf("___"))>=0) {
+				txt = txt0.substring(0, ii).trim();
+				break;
+			}
 		}
 		return txt;
 	}
@@ -1124,9 +1133,9 @@ System.out.println("reply: "+ subj);
 				String nm = readinfo(from, "NAME");
 				String id = readinfo(from, "STDID");
 				if(nm==null || nm.length()==0) {
-					aReply.add("กรุณาแจ้งชื่อ ด้วยหัวเรื่อง 'NAME' และใส่ชื่อ ตามด้วย '...'");
+					aReply.add("กรุณาแจ้งชื่อ ด้วยหัวเรื่อง 'NAME' และใส่ชื่อ ตามด้วย '...' หรือ '___'");
 				} else if(id==null || id.length()==0) {
-					aReply.add("กรุณาแจ้งรหัสนักศึกษา ด้วยหัวเรื่อง 'STDID' และใส่รหัสนักศึกษา ตามด้วย '...'");
+					aReply.add("กรุณาแจ้งรหัสนักศึกษา ด้วยหัวเรื่อง 'STDID' และใส่รหัสนักศึกษา ตามด้วย '...' หรือ '___'");
 				} else if(txt!=null && exm!=null) {
 					if(exm.equals("START") ) {
 						String qz = readinfo(own, "QUIZ"+ns);
@@ -1140,7 +1149,7 @@ System.out.println("reply: "+ subj);
 						aReply.add(subj+" 'ไม่อยู่ในช่วงเวลาทำข้อสอบ'");
 					}
 				} else {
-					aReply.add(subj+" PLEASE PUT END WITH '...'");
+					aReply.add(subj+" PLEASE PUT END WITH '...' หรือ '___'");
 				}
 			} else {
 				if(txt==null) {
