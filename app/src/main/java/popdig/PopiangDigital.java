@@ -52,6 +52,8 @@ public class PopiangDigital {
 	public static boolean bWindows = false, bMacos = false, bLinux = false;
 	public static boolean bWebServer = false;
 	public static PopiangWindow wind;
+	public static String sWeb = "";
+	public static String sSub = "";
 
 	public static Map<String,String> hObject = new Hashtable<>();
 //	public static int webPort = 8080;

@@ -236,7 +236,7 @@ System.out.println("ctx init");
 System.out.println("ctx update");
 
 			log = Logger.getLogger(PopiangUtil.class);
-System.out.println("getLogger");
+System.out.println("GetLogger: "+log);
 
 		} catch(Exception z) {
 			z.printStackTrace();
@@ -249,10 +249,10 @@ System.out.println("getLogger");
 		try {
 
 System.out.println("================================================");
-log.info("NODE.TTL"+PopiangDigital.fNode.getAbsolutePath());
+System.out.println("NODE.TTL"+PopiangDigital.fNode.getAbsolutePath());
 			String ct = new String(Files.readAllBytes(
 				Paths.get(PopiangDigital.fNode.getAbsolutePath())),"UTF-8");
-log.info(ct);
+System.out.println(ct);
 
 			org.apache.jena.query.ARQ.init();
 			Model mo = ModelFactory.createDefaultModel();
@@ -262,7 +262,7 @@ log.info(ct);
 				+ "PREFIX vp: 	<"+defaultBaseUrl+"/voc-pred#>"
 				+ "PREFIX vo: 	<"+defaultBaseUrl+"/voc-obj#>"
 				+ "PREFIX nd:	<"+defaultBaseUrl+"/nd#>"
-				+ " SELECT ?c ?d ?e ?g ?h ?i ?k ?l ?m ?n ?o ?p ?j ?q ?r ?nt ?qry ?u ?s WHERE { "
+				+ " SELECT ?c ?d ?e ?g ?h ?i ?k ?l ?m ?n ?o ?p ?j ?q ?r ?nt ?qry ?u ?s ?web ?sub WHERE { "
 				+ " ?a a vo:PopiNode . "
 				+ " ?a vp:type ?nt . "
 				+ " ?a vp:owner ?f . "
@@ -299,6 +299,8 @@ log.info(ct);
   				+ "	} "
 
 				+ " OPTIONAL { ?a vp:query ?qry . } "
+				+ " OPTIONAL { ?a vp:webdir ?web . } "
+				+ " OPTIONAL { ?a vp:subdir ?sub . } "
 
   				+ "	} "
 				;
@@ -329,9 +331,14 @@ log.info("OWNER EMAIL: "+ PopiangDigital.sEmail);
 				PopiangDigital.sWorkRepo = map.get("o");
 				PopiangDigital.sBaseIRI = map.get("p");
 				PopiangDigital.sSurvey = map.get("s");
-System.out.println("========= BASE: "+ PopiangDigital.sBaseIRI);
+System.out.println("========= BASE0: "+ PopiangDigital.sBaseIRI);
 				PopiangDigital.sQuery = map.get("qry");
-log.info("QUERY: "+ map.get("qry"));
+
+				PopiangDigital.sWeb = map.get("web");
+				PopiangDigital.sSub = map.get("sub");
+System.out.println("WEBDIR: "+ PopiangDigital.sWeb);
+System.out.println("SUBDIR: "+ PopiangDigital.sSub);
+				
 				if(map.get("j")!=null) { // gui
 					PopiangDigital.bGui = true;
 					PopiangDigital.sFontName = map.get("k");

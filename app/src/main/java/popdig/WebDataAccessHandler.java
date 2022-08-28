@@ -42,6 +42,261 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.*;
 import java.util.Map.Entry;
+import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
+import io.undertow.util.MimeMappings;
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.vocabulary.*;
+import org.apache.jena.query.*;
+
+public class WebDataAccessHandler implements HttpHandler {
+	boolean bInit = false;
+	Map<String,String> hOrg;
+	String sSub;
+	String nmsp = "http://dga.tueng.org/rdf/or#";
+	SimpleDateFormat datefm = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+
+	String toUTF8(String txt) {
+		try {
+			byte[] bb = new byte[txt.length()];
+			for(int i=0; i<bb.length; i++) {
+				bb[i] = (byte) txt.charAt(i);
+			}
+			return new String(bb,"UTF-8");
+		} catch(Throwable z) {
+			return null;
+		}
+	}
+
+	void init() {
+		if(bInit) return;
+		try {
+			sSub = PopiangDigital.sSub;
+			String orf = sSub+"/rdf/org.ttl";
+			Model mo = ModelFactory.createDefaultModel();
+			mo.read(new FileInputStream(orf), null, "TTL");
+			String sqry = ""
++"PREFIX org:        <http://www.w3.org/ns/org#> "
++"PREFIX rdfs:       <http://www.w3.org/2000/01/rdf-schema#> "
++"PREFIX or: <http://dga.tueng.org/rdf/dnm1G#> "
++"SELECT ?a ?b WHERE { ?a rdfs:label ?b . }"
++"";
+			hOrg = new Hashtable<String,String>();
+			List<Map<String,String>> aMap = PopiangUtil.sparql0(mo, sqry);
+			for(int i=0; i<aMap.size(); i++) {
+				Map<String,String> hM = aMap.get(i);
+				hOrg.put(hM.get("a"), hM.get("b"));
+			}
+			
+			bInit = true;
+		} catch(Exception z) {
+			z.printStackTrace();
+		}
+	}
+
+	public String reserveAccess(String email, String orid0, String name, String time, String org) {
+		init();
+		try {
+			orid0 = orid0.toLowerCase();
+			System.out.println("RESERV ACCESS FOR: "+ email + " for "+ orid0);
+			Path filePath = Path.of(sSub+"/temp/orgreq-yes.txt");
+			String content = Files.readString(filePath);
+
+			File access = new File(sSub+"/access");
+			String tok = datefm.format(Calendar.getInstance().getTime());
+
+			if(!access.exists()) access.mkdirs();
+
+			String oid = orid0.substring(orid0.lastIndexOf("#")+1);
+			String link = "https://dga.tueng.org/acc/"+tok+"/sv-"+oid+".html";
+			String test = "http://localhost:6002/acc/"+tok+"/sv-"+oid+".html";
+
+			FileOutputStream fos = new FileOutputStream(sSub+"/access/"+tok+".ttl");
+			PrintWriter pw = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"));
+			pw.println("@prefix ac: <http://dga.tueng.org/rdf/ac#> .");
+			pw.println("@prefix vp: <http://dga.tueng.org/rdf/vp#> .");
+			pw.println("");
+			pw.println("ac:"+tok+"  a  vp:Access ;");
+			pw.println("vp:orgId  <"+orid0+"> ;");
+			pw.println("vp:orgName  '"+ hOrg.get(orid0)+ "' ;");
+			pw.println("vp:editor   '"+ name + "' ;");
+			pw.println("vp:editorOrg   '"+ org + "' ;");
+			pw.println("vp:email    '"+email+"' ;");
+			pw.println("vp:time     '"+time+"' ;");
+			pw.println("vp:link		'"+link+"' .");
+			pw.flush();
+			pw.close();
+
+System.out.println("==== orid0: "+ orid0+" : "+ hOrg.get(orid0));
+			content = content.replace("___ORGID___", orid0);
+			content = content.replace("___ORGNAME___", hOrg.get(orid0));
+			content = content.replace("___EDITOR___", name);
+			content = content.replace("___ORG___", org);
+			content = content.replace("___EMAIL___", email);
+			content = content.replace("___TIME___", time);
+			content = content.replace("___EDITLINK___", link);
+			content = content.replace("___TESTLINK___", test);
+
+			return content;
+		} catch(Exception z) {
+			z.printStackTrace();
+		}
+		return "";
+	}
+
+	boolean access(HttpServerExchange ex) throws Exception {
+		String rel = ex.getRelativePath();
+System.out.println("1."+rel);
+		if(!rel.startsWith("/")) return false;
+System.out.println("2."+rel);
+		int i1 = rel.indexOf("/", 1);
+		if(i1!=18) return false;
+		String tok = rel.substring(1,i1);
+		String pth = rel.substring(i1);
+		File ftok = new File(sSub+"/access/"+tok+".ttl");
+
+		System.out.println("TOK: "+ tok);
+		System.out.println("ftok: "+ ftok+ " : "+ ftok.exists());
+		System.out.println("ACCESS: "+ pth);
+
+		if(ftok.exists()) {
+			Model mo = ModelFactory.createDefaultModel();
+			mo.read(new FileInputStream(ftok), null, "TTL");
+			String sqry = ""
++"PREFIX ac:       <http://dga.tueng.org/rdf/ac#> "
++"PREFIX vp:       <http://dga.tueng.org/rdf/vp#> "
++"SELECT ?a ?b WHERE {"
++" ?a a ?b . "
++" ?a vp:orgId ?b . "
++"}";
+			List<Map<String,String>> aMap = PopiangUtil.sparql0(mo, sqry);
+			System.out.println("aMap: "+ aMap.size());
+
+			if (ex.isInIoThread()) { ex.dispatch(this); return true; }
+			ex.startBlocking();
+			Path filePath = Path.of(sSub+pth);
+			String content = Files.readString(filePath);
+			content = content.replace("___EMAIL___", PopiangDigital.sRecvEmail);
+			MimeMappings mimap = MimeMappings.DEFAULT;
+			String type = mimap.getMimeType(rel.substring(rel.lastIndexOf(".")+1));
+			ex.getResponseHeaders().put(Headers.CONTENT_TYPE, type);
+			ex.getResponseSender().send(content);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	boolean accessRequest(HttpServerExchange ex) throws Exception {
+		String rel = ex.getRelativePath();
+		if(rel.startsWith("/editreq/")) {
+			String orid = rel.substring(9);
+			if(orid.startsWith("or-")) {
+				String orid0 = nmsp+orid.substring(3);
+				String ornm = hOrg.get(orid0);
+
+				if (ex.isInIoThread()) { ex.dispatch(this); return true; }
+				String ddtt = datefm.format(Calendar.getInstance().getTime());
+				Builder builder = FormParserFactory.builder();
+				final FormDataParser formDataParser = builder.build().createParser(ex);
+				if (formDataParser == null) {
+					Path filePath = Path.of(sSub+"/temp/orgreg.html");
+					String content = Files.readString(filePath);
+					content = content.replace("___ORGID___", orid0);
+					content = content.replace("___ORGNAME___", ornm);
+					ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+					ex.getResponseSender().send(content);
+				} else {
+					ex.startBlocking();
+					FormData formData = formDataParser.parseBlocking();
+					String val = null, name=null, org=null, email=null, time=null;
+					for (String data : formData) {
+						val = null;
+						for (FormData.FormValue formValue : formData.get(data)) {
+							val = formValue.getValue();
+							val = toUTF8(val);
+						}
+						if("name".equals(data)) {
+							name = val;
+						} else if("org".equals(data)) {
+							org = val;
+						} else if("email".equals(data)) {
+							email = val;
+						} else if("time".equals(data)) {
+							time = val;
+						}
+					}
+					if(name!=null && org!=null && email!=null && time!=null) {
+						Path filePath = Path.of(sSub+"/temp/orgreq-yes.html");
+						String content = Files.readString(filePath);
+						content = content.replace("___ORGID___", orid0);
+						content = content.replace("___ORGNAME___", ornm);
+						content = content.replace("___EDITOR___", name);
+						content = content.replace("___ORG___", org);
+						content = content.replace("___EMAIL___", email);
+						content = content.replace("___TIME___", time);
+						content = content.replace("___RECVEMAIL___", PopiangDigital.sRecvEmail);
+						content = content.replace("___SUBJECT___", "EDIT="+orid0);
+
+						ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+						ex.getResponseSender().send(content);
+
+						content = reserveAccess(email, orid0, name, time, org);
+			
+						final Hashtable<String,List<String>> hsText = new Hashtable<>();
+						final String em=email, sb="ลิงค์แก้ไขข้อมูล "+ornm, ms=content;
+						new Thread() {
+							@Override
+							public void run() {
+								PopiangDigital.email.sendEMail(em, sb, ms, hsText);
+							}} .start();
+
+					} else {
+						Path filePath = Path.of(sSub+"/temp/orgreq-no.html");
+						String content = Files.readString(filePath);
+						ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+						ex.getResponseSender().send(content);
+					}
+				}
+
+				return true;
+			}
+		}
+		return false;
+	}
+	boolean sendFile(HttpServerExchange ex) throws Exception {
+		String rel = ex.getRelativePath();
+		String sub = PopiangDigital.sSub;
+		String pth = sub+rel;
+		File file = new File(pth);
+		if(file.exists()) {
+			if (ex.isInIoThread()) { ex.dispatch(this); return true; }
+			ex.startBlocking();
+			Path filePath = Path.of(pth);
+			String content = Files.readString(filePath);
+			content = content.replace("___EMAIL___", PopiangDigital.sRecvEmail);
+			MimeMappings mimap = MimeMappings.DEFAULT;
+			String type = mimap.getMimeType(rel.substring(rel.lastIndexOf(".")+1));
+			ex.getResponseHeaders().put(Headers.CONTENT_TYPE, type);
+			ex.getResponseSender().send(content);
+			return true;
+		}
+		return false;
+	}
+	@Override
+	public void handleRequest(final HttpServerExchange ex) throws Exception {
+		init();
+		if(sendFile(ex)) return;
+		if(accessRequest(ex)) return;
+		if(access(ex)) return;
+
+		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+		ex.getResponseSender().send("<H1>OK</H1>");
+	}
+}
+
+/*
 
 public class WebServer {
 
@@ -49,7 +304,6 @@ public class WebServer {
 
 	SimpleDateFormat datefm = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS");
 	SimpleDateFormat datetm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	public WebDataAccessHandler access;
 
 	String ht2 = 
 		"<head>\n"+
@@ -562,18 +816,6 @@ System.out.println(rdf);
 			ex.getResponseSender().send(page0.toString());
 		}
 	};
-	String toUTF8(String txt) {
-		try {
-			byte[] bb = new byte[txt.length()];
-			for(int i=0; i<bb.length; i++) {
-				bb[i] = (byte) txt.charAt(i);
-			}
-			return new String(bb,"UTF-8");
-		} catch(Throwable z) {
-			return null;
-		}
-	}
-
 	Undertow server;
 	HttpHandler fact = new HttpHandler() {
 		@Override
@@ -725,8 +967,6 @@ System.out.println("WebDir PAGE: "+ page);
 		path.addPrefixPath("/res", resource(
 			new PathResourceManager(Paths.get(respath), 100))
 				.setDirectoryListingEnabled(true));
-		access = new WebDataAccessHandler();
-		path.addPrefixPath("/acc", access);
 
 		// static web page at root '/'
 		PathResourceManager rt = new PathResourceManager(Paths.get(page), 100) {
@@ -750,4 +990,5 @@ System.out.println("WebDir PAGE: "+ page);
 		server.start();
 	}
 }
+*/
 

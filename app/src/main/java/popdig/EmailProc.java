@@ -97,11 +97,10 @@ public class EmailProc {
 			if(!fBaseDir.exists()) fBaseDir.mkdirs();
 			fUser = new File(fBaseDir+"/memb");
 System.out.println("===============1 Start Email:"+ PopiangDigital.sRecvEmail);
-System.out.println("start thread");
 			new Thread() { public void run() {
 				while(true) {
 					bImap = true;
-System.out.println("  imap fetch");
+//System.out.println("  imap fetch");
 					Thread fet = new Thread() { public void run() { imapFetchThread(); } };
 					Thread idl = new Thread() { public void run() { imapIdleThread(); } };
 					Thread prc = new Thread() { public void run() { procParseThread(); } };
@@ -327,7 +326,7 @@ System.out.println("4.2 read msg");
 			propImap.put("mail.imaps.ssl.trust", "*");
 			Session session = Session.getInstance(propImap, null);
 			Store store = session.getStore("imap");
-System.out.println("imap:"+PopiangDigital.sImap+" em:"+PopiangDigital.sRecvEmail+" pw:"+PopiangDigital.sPassWord);
+// System.out.println("imap:"+PopiangDigital.sImap+" em:"+PopiangDigital.sRecvEmail+" pw:"+PopiangDigital.sPassWord);
 //			store.connect(imap, email, pass);
 			store.connect(PopiangDigital.sImap, PopiangDigital.sRecvEmail, PopiangDigital.sPassWord);
 			folder = (IMAPFolder) store.getFolder("Inbox");
@@ -340,7 +339,8 @@ System.out.println("imap:"+PopiangDigital.sImap+" em:"+PopiangDigital.sRecvEmail
 			folder.open(Folder.READ_WRITE);
 		} catch(Exception x) {
 //			log.info(x);
-			x.printStackTrace();
+			System.out.println("ER-01: "+ x);
+//			x.printStackTrace();
 			folder = null;
 		}
 		return folder;
@@ -561,14 +561,14 @@ System.out.println("1.--- String");
 						len0 = 0;
 						while((len=is.read(buff,0,buff.length))>0) {
 							len0 += len;
-try {
-//							log.info("attached read PDF: "+ len0);
-							baos.write(buff,0,len);
-} catch(Exception z) {
-z.printStackTrace();
-bImap = false;
-break;
-}
+							try {
+//								log.info("attached read PDF: "+ len0);
+								baos.write(buff,0,len);
+							} catch(Exception z) {
+							z.printStackTrace();
+								bImap = false;
+								break;
+							}
 						}
 						byte[] bres = baos.toByteArray();
 						hbStrm.get("PDF").add(bres);
@@ -1063,6 +1063,11 @@ System.out.println("reply: "+ subj);
 		int i1,i2;
 		String own = PopiangDigital.sEmail.toUpperCase();
 		subj = subj.replaceAll("^\\s+", "").replaceAll("\\s+$", "");
+
+		if((i1=subj.indexOf("="))>0 && (txt==null || txt.length()==0)) {
+			txt = subj.substring(i1+1).trim();
+			subj = subj.substring(0,i1).trim();
+		}
 	
 		if((i1=subj.indexOf("<="))>0 && own.equals(from)) {
 			String emrep = subj.substring(i1+2);
@@ -1119,6 +1124,11 @@ System.out.println("reply: "+ subj);
 					aReply.add("หยุดรับ "+subj+" แล้วค่ะ");
 				}
 			}
+		} else if(subj.equals("EDIT")) {
+System.out.println("EDIT: "+ txt);
+			String rp = PopiangDigital.webserver.access.reserveAccess(from, txt, "", "3H", "");
+System.out.println("REPLY: "+ rp);
+			aReply.add(rp);
 		} else if(subj.startsWith("FORM")) {
 			List<byte[]> bL = hbStrm.get("PDF");
 			if(bL.size()>0) {
