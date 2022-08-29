@@ -8,6 +8,7 @@ import io.undertow.server.*;
 import io.undertow.util.*;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.Handlers;
+import java.util.Calendar;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -104,7 +105,24 @@ public class WebDataAccessHandler implements HttpHandler {
 			String content = Files.readString(filePath);
 
 			File access = new File(sSub+"/access");
-			String tok = datefm.format(Calendar.getInstance().getTime());
+//			String tok = datefm.format(Calendar.getInstance().getTime());
+			Calendar c = Calendar.getInstance();
+			String tok = datefm.format(c.getTime());
+			if(time.equals("3H")) {
+				c.add(Calendar.HOUR, 3);
+			} else if(time.equals("1D")) {
+				c.add(Calendar.DATE, 1);
+			} else if(time.equals("7D")) {
+				c.add(Calendar.DATE, 7);
+			} else if(time.equals("1M")) {
+				c.add(Calendar.MONTH, 1);
+			} else {
+				c.add(Calendar.DATE, 1);
+			}
+			String end = datefm.format(c.getTime());
+
+//			Calendar ttt = Calender.getInstance();
+//			String tok = datefm.format(now.getTime());
 
 			if(!access.exists()) access.mkdirs();
 
@@ -124,7 +142,10 @@ public class WebDataAccessHandler implements HttpHandler {
 			pw.println("vp:editorOrg   '"+ org + "' ;");
 			pw.println("vp:email    '"+email+"' ;");
 			pw.println("vp:time     '"+time+"' ;");
+			pw.println("vp:start     '"+tok+"' ;");
+			pw.println("vp:end     '"+end+"' ;");
 			pw.println("vp:link		'"+link+"' .");
+			pw.println("");
 			pw.flush();
 			pw.close();
 
@@ -166,22 +187,120 @@ System.out.println("2."+rel);
 			String sqry = ""
 +"PREFIX ac:       <http://dga.tueng.org/rdf/ac#> "
 +"PREFIX vp:       <http://dga.tueng.org/rdf/vp#> "
-+"SELECT ?a ?b WHERE {"
++"SELECT ?a ?b ?c ?start ?end ?email WHERE {"
 +" ?a a ?b . "
-+" ?a vp:orgId ?b . "
++" ?a vp:orgId ?c . "
++" ?a vp:start  ?start . "
++" ?a vp:email  ?email . "
++" ?a vp:end  ?end . "
 +"}";
 			List<Map<String,String>> aMap = PopiangUtil.sparql0(mo, sqry);
-			System.out.println("aMap: "+ aMap.size());
+			if(aMap.size()!=1) return false;
+			String start = aMap.get(0).get("start");
+			String end = aMap.get(0).get("end");
+			String eml = aMap.get(0).get("email");
+			String curr = datefm.format(Calendar.getInstance().getTime());
+			System.out.println("START: "+ start);
+			System.out.println("CURRE: "+ curr);
+			System.out.println("EXPIRE: "+ end);
+			System.out.println("DIFF: "+ curr.compareTo(end));
 
 			if (ex.isInIoThread()) { ex.dispatch(this); return true; }
 			ex.startBlocking();
-			Path filePath = Path.of(sSub+pth);
-			String content = Files.readString(filePath);
-			content = content.replace("___EMAIL___", PopiangDigital.sRecvEmail);
-			MimeMappings mimap = MimeMappings.DEFAULT;
-			String type = mimap.getMimeType(rel.substring(rel.lastIndexOf(".")+1));
-			ex.getResponseHeaders().put(Headers.CONTENT_TYPE, type);
-			ex.getResponseSender().send(content);
+
+			File f = new File(sSub+pth);
+			if(f.exists()) {
+				Path filePath = Path.of(sSub+pth);
+				String content = Files.readString(filePath);
+				content = content.replace("___EMAIL___", PopiangDigital.sRecvEmail);
+				MimeMappings mimap = MimeMappings.DEFAULT;
+				String type = mimap.getMimeType(rel.substring(rel.lastIndexOf(".")+1));
+				ex.getResponseHeaders().put(Headers.CONTENT_TYPE, type);
+				ex.getResponseSender().send(content);
+			} else {
+System.out.println("===== PATH: "+ pth);
+				if(pth.equals("/save")) {
+					String res = "";
+					String orgid = "";
+					List<String> aK = new ArrayList<>();
+					List<String> aV = new ArrayList<>();
+					for(Entry<String,Deque<String>> ent : ex.getQueryParameters().entrySet()) {
+						String k = ent.getKey();
+						String v = ent.getValue().getFirst();
+						if(k.equals("orid")) {
+							orgid = v;
+						}
+						if(!k.startsWith("sv")) continue;
+						aK.add(k);
+						aV.add(v);
+						if(res.length()>0) res+="\n";
+						res += k + "=" + v;
+					}
+System.out.println("SAVE: "+ tok);
+System.out.println("TIME: "+ curr);
+					for(int i=0; i<aK.size(); i++) {
+						String sv = aK.get(i);
+						String va = aV.get(i);
+System.out.println("or:"+ orgid+" sv:"+aK.get(i)+" va:"+aV.get(i));
+						File fDir = new File(sSub+"/data/"+orgid+"/"+sv+"/"+curr.substring(0,8));
+						if(!fDir.exists()) fDir.mkdirs();
+						File fDat = new File(sSub+"/data/"+orgid+"/"+sv+"/"+curr.substring(0,8)+"/"+curr+".ttl");
+System.out.println("fDir: "+ fDir);
+						File fVal = new File(sSub+"/data/"+orgid+"/"+sv+"/value.txt");
+
+						FileOutputStream fos = new FileOutputStream(fDat);
+						PrintWriter pw = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"));
+						pw.println("@prefix dt: <http://dga.tueng.org/rdf/dt#> .");
+						pw.println("@prefix ac: <http://dga.tueng.org/rdf/ac#> .");
+						pw.println("@prefix vp: <http://dga.tueng.org/rdf/vp#> .");
+						pw.println("");
+						pw.println("dt:"+curr+"  a  vp:Data ;");
+						pw.println("vp:token   <ac:"+tok+"> ;");
+						pw.println("vp:email   '"+eml+"' ;");
+						pw.println("vp:service   '"+ sv + "' ;");
+						pw.println("vp:value  '"+ va + "' .");
+						pw.println("");
+						pw.flush();
+						pw.close();
+
+						fos = new FileOutputStream(fVal);
+						pw = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"));
+						pw.println(va);
+						pw.close();
+
+					}
+					ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+					ex.getResponseSender().send(res);
+				} else if(pth.equals("/read")) {
+					String orgid = "";
+					for(Entry<String,Deque<String>> ent : ex.getQueryParameters().entrySet()) {
+						String k = ent.getKey();
+						String v = ent.getValue().getFirst();
+						if(k.equals("orid")) {
+							orgid = v;
+							break;
+						}
+					}
+					System.out.println("READING: "+orgid);
+					File fDir = new File(sSub+"/data/"+orgid);
+					File[] flist = fDir.listFiles();
+					String ln = "";
+					for(int i=0; i<flist.length; i++) {
+						File fDat = new File(flist[i]+"/value.txt");
+						String name = flist[i].getName();
+						if(!fDat.exists()) continue;
+						Path filePath = Path.of(fDat.getAbsolutePath());
+						String content = Files.readString(filePath);
+						content = content.trim();
+						System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
+						if(ln.length()>0) ln += "\n";
+						ln += name+"="+content;
+					}
+System.out.println(ln);
+					ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+					ex.getResponseSender().send(ln);
+				}
+			}
 			return true;
 		} else {
 			return false;
