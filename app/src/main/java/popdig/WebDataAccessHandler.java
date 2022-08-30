@@ -436,7 +436,7 @@ System.out.println("     "+name+" = ["+ content+"]");
 		if(access(ex)) return;
 
 		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
-		ex.getResponseSender().send("<H1><a href='/'>กลับหน้าหลัก</a></H1>");
+		ex.getResponseSender().send("<script>window.location.href='/';</script>");
 	}
 }
 
