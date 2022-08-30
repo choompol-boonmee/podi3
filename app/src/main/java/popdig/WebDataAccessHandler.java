@@ -50,6 +50,7 @@ import io.undertow.util.MimeMappings;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.*;
 import org.apache.jena.query.*;
+import org.apache.commons.io.FileUtils;
 
 public class WebDataAccessHandler implements HttpHandler {
 	boolean bInit = false;
@@ -149,6 +150,13 @@ public class WebDataAccessHandler implements HttpHandler {
 			pw.flush();
 			pw.close();
 
+			File fsrc = new File(sSub+"/access/"+tok+".ttl");
+System.out.println("FTOK: "+ fsrc);
+			File fdir = new File(sSub+"/auth/"+tok.substring(0,8));
+			File fdst = new File(sSub+"/auth/"+tok.substring(0,8)+"/"+tok+".ttl");
+			if(!fdir.exists()) fdir.mkdirs();
+			FileUtils.copyFile(fsrc, fdst);
+
 System.out.println("==== orid0: "+ orid0+" : "+ hOrg.get(orid0));
 			content = content.replace("___ORGID___", orid0);
 			content = content.replace("___ORGNAME___", hOrg.get(orid0));
@@ -199,11 +207,18 @@ System.out.println("2."+rel);
 			String start = aMap.get(0).get("start");
 			String end = aMap.get(0).get("end");
 			String eml = aMap.get(0).get("email");
+			String oid = aMap.get(0).get("c");
 			String curr = datefm.format(Calendar.getInstance().getTime());
+			System.out.println("ORGID: "+ oid);
 			System.out.println("START: "+ start);
 			System.out.println("CURRE: "+ curr);
-			System.out.println("EXPIRE: "+ end);
+			System.out.println("EXPIR: "+ end);
 			System.out.println("DIFF: "+ curr.compareTo(end));
+
+			if(curr.compareTo(end)>0) {
+				System.out.println("ลบสิทธิ์: "+ ftok.getAbsolutePath());
+				ftok.delete();
+			}
 
 			if (ex.isInIoThread()) { ex.dispatch(this); return true; }
 			ex.startBlocking();
@@ -263,6 +278,12 @@ System.out.println("fDir: "+ fDir);
 						pw.flush();
 						pw.close();
 
+						File fsrc = fDat;
+						File fdir = new File(sSub+"/action/"+curr.substring(0,8));
+						File fdst = new File(sSub+"/action/"+curr.substring(0,8)+"/"+orgid+"_"+sv+"_"+curr+".ttl");
+						if(!fdir.exists()) fdir.mkdirs();
+						FileUtils.copyFile(fsrc, fdst);
+
 						fos = new FileOutputStream(fVal);
 						pw = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"));
 						pw.println(va);
@@ -283,20 +304,22 @@ System.out.println("fDir: "+ fDir);
 					}
 					System.out.println("READING: "+orgid);
 					File fDir = new File(sSub+"/data/"+orgid);
-					File[] flist = fDir.listFiles();
 					String ln = "";
-					for(int i=0; i<flist.length; i++) {
-						File fDat = new File(flist[i]+"/value.txt");
-						String name = flist[i].getName();
-						if(!fDat.exists()) continue;
-						Path filePath = Path.of(fDat.getAbsolutePath());
-						String content = Files.readString(filePath);
-						content = content.trim();
-						System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
-						if(ln.length()>0) ln += "\n";
-						ln += name+"="+content;
+					if(fDir.exists()) {
+						File[] flist = fDir.listFiles();
+						for(int i=0; i<flist.length; i++) {
+							File fDat = new File(flist[i]+"/value.txt");
+							String name = flist[i].getName();
+							if(!fDat.exists()) continue;
+							Path filePath = Path.of(fDat.getAbsolutePath());
+							String content = Files.readString(filePath);
+							content = content.trim();
+System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
+System.out.println("     "+name+" = ["+ content+"]");
+							if(ln.length()>0) ln += "\n";
+							ln += name+"="+content;
+						}
 					}
-System.out.println(ln);
 					ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
 					ex.getResponseSender().send(ln);
 				}
