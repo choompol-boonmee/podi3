@@ -999,6 +999,10 @@ System.out.println("reply: "+ subj);
 				txt = txt0.substring(0, ii).trim();
 				break;
 			}
+			if((ii=txt0.indexOf("นับถือ"))>=0) {
+				txt = txt0.substring(0, ii).trim();
+				break;
+			}
 		}
 		return txt;
 	}
@@ -1123,6 +1127,12 @@ System.out.println("reply: "+ subj);
 				} else {
 					aReply.add("หยุดรับ "+subj+" แล้วค่ะ");
 				}
+			}
+		} else if(subj.startsWith("ขออนุญาต") && subj.length()>12 && subj.length()<100) {
+			if(txt==null) {
+				aReply.add("ไม่สามารถอนุญาตได้เนื่องจากข้อมูลไม่ครบถ้วน\nกรุณาใส่ข้อมูลอย่างน้อยดังนี้ \n บรรทัดแรกว่า 'ชื่อ:' ตามด้วยชื่อของท่าน \nและจบบรรทัดสุดท้ายด้วย 'นับถือ'");
+			} else {
+				aReply.add("อนุญาตให้ท่าน" + subj.substring(8)+ "ได้\n"+txt+"\n\nลงนามโดย\nนายกเทศมนตรี");
 			}
 		} else if(subj.equals("EDIT")) {
 System.out.println("EDIT: "+ txt);
