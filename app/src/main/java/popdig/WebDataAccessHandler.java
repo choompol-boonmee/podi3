@@ -97,6 +97,39 @@ public class WebDataAccessHandler implements HttpHandler {
 		}
 	}
 
+	void readValue(HttpServerExchange ex) throws Exception {
+
+		String orgid = "";
+		for(Entry<String,Deque<String>> ent : ex.getQueryParameters().entrySet()) {
+			String k = ent.getKey();
+			String v = ent.getValue().getFirst();
+			if(k.equals("orid")) {
+				orgid = v;
+				break;
+			}
+		}
+		System.out.println("READING: "+orgid);
+		File fDir = new File(sSub+"/data/"+orgid);
+		String ln = "";
+		if(fDir.exists()) {
+			File[] flist = fDir.listFiles();
+			for(int i=0; i<flist.length; i++) {
+				File fDat = new File(flist[i]+"/value.txt");
+				String name = flist[i].getName();
+				if(!fDat.exists()) continue;
+				Path filePath = Path.of(fDat.getAbsolutePath());
+				String content = Files.readString(filePath);
+				content = content.trim();
+//System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
+//System.out.println("     "+name+" = ["+ content+"]");
+				if(ln.length()>0) ln += "\n";
+				ln += name+"="+content;
+			}
+		}
+		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+		ex.getResponseSender().send(ln);
+	}
+
 	public String reserveAccess(String email, String orid0, String name, String time, String org) {
 		init();
 		try {
@@ -176,9 +209,9 @@ System.out.println("==== orid0: "+ orid0+" : "+ hOrg.get(orid0));
 
 	boolean access(HttpServerExchange ex) throws Exception {
 		String rel = ex.getRelativePath();
-System.out.println("1."+rel);
+//System.out.println("1."+rel);
 		if(!rel.startsWith("/")) return false;
-System.out.println("2."+rel);
+//System.out.println("2."+rel);
 		int i1 = rel.indexOf("/", 1);
 		if(i1!=18) return false;
 		String tok = rel.substring(1,i1);
@@ -293,6 +326,8 @@ System.out.println("fDir: "+ fDir);
 					ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
 					ex.getResponseSender().send(res);
 				} else if(pth.equals("/read")) {
+					readValue(ex);
+/*
 					String orgid = "";
 					for(Entry<String,Deque<String>> ent : ex.getQueryParameters().entrySet()) {
 						String k = ent.getKey();
@@ -322,6 +357,7 @@ System.out.println("     "+name+" = ["+ content+"]");
 					}
 					ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
 					ex.getResponseSender().send(ln);
+*/
 				}
 			}
 			return true;
@@ -434,6 +470,8 @@ System.out.println("     "+name+" = ["+ content+"]");
 		if(sendFile(ex)) return;
 		if(accessRequest(ex)) return;
 		if(access(ex)) return;
+		String rel = ex.getRelativePath();
+		if(rel.startsWith("/read")) readValue(ex);
 
 		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
 		ex.getResponseSender().send("<script>window.location.href='/';</script>");
