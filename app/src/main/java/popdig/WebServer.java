@@ -338,16 +338,14 @@ System.out.println(rdf);
 			pg.append("<body>");
 			String surv = getSurveyDir()+"subscribe/";
 			File fsurv = new File(surv);
-System.out.println("SUBS: "+fsurv+ ":" + fsurv.exists());
 			String[] aDir = fsurv.list();
 			List<String> lDir = new ArrayList<>();
 			for(int i=0; i<aDir.length; i++) {
-System.out.println("  "+i+":"+aDir[i]);
 				if(aDir[i].length()!=8) continue;
 				File fDir = new File(fsurv+"/"+aDir[i]);
-System.out.println("       "+fDir+" : "+ fDir.exists());
 				if(!fDir.isDirectory()) continue;
 				lDir.add(aDir[i]);
+System.out.println("       "+fDir+" : "+ fDir.exists());
 			}
 
 		try {
@@ -356,10 +354,12 @@ System.out.println("       "+fDir+" : "+ fDir.exists());
 			Arrays.sort(sDir);
 			Hashtable<String,String> hReg = new Hashtable<>();
 			for(int i=0; i<sDir.length; i++) {
+System.out.println("DIR: "+ sDir[i]);
 				File fDay = new File(fsurv+"/"+sDir[i]);
 				String[] regs = fDay.list();
 				for(int j=0; j<regs.length; j++) {
 					Path pth = Paths.get(surv, sDir[i], regs[j]);
+System.out.println("  "+j+": "+ pth+" : "+ pth.toFile().exists());
 					if(!pth.toFile().exists()) continue;
 					Stream<String> sline = Files.lines(pth);
 					List<String> lLine = sline.collect(Collectors.toList());
