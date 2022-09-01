@@ -363,11 +363,11 @@ System.out.println("DIR: "+ sDir[i]);
 				String[] regs = fDay.list();
 				for(int j=0; j<regs.length; j++) {
 					Path pth = Paths.get(surv, sDir[i], regs[j]);
-System.out.println("  "+j+": "+ pth+" : "+ pth.toFile().exists());
+//System.out.println("  "+j+": "+ pth+" : "+ pth.toFile().exists());
 					if(!pth.toFile().exists()) continue;
 					Stream<String> sline = Files.lines(pth);
 					List<String> lLine = sline.collect(Collectors.toList());
-System.out.println("    "+lLine.size());
+//System.out.println("    "+lLine.size());
 					if(lLine.size()<8) continue;
 					String fnm = pth.toFile().getName();
 					int i1,i2;
@@ -389,33 +389,25 @@ System.out.println("    "+lLine.size());
 					
 					ahLog.add(hLog);
 					cnt++;
-//					pg.append("\n"+cnt+", "+mail+", "+name+", "+org+", "+fnm+"<br>");
 				}
 			}
 			class CustomSort implements Comparator<Map<String,String>> {
 				public int compare(Map<String,String> a, Map<String,String> b) {
 					String fa = a.get("file");
 					String fb = b.get("file");
-					return fb.compareTo(fa);
+					return fa.compareTo(fb);
 				}
 			}
 			Map<String,String>[] maps = ahLog.toArray(new HashMap[ahLog.size()]);
 			Arrays.sort(maps, new CustomSort());
-			for(int i=0; i<maps.length; i++) {
+			for(int i=maps.length-1; i>=0; i--) {
 				String mail = maps[i].get("mail");
 				String name = maps[i].get("name");
 				String org = maps[i].get("org");
 				String file = maps[i].get("file");
 				pg.append("\n"+(i+1)+", "+mail+", "+name+", "+org+", "+file+"<br>");
 			}
-//			Arrays.sort<Map<String,String>>(maps, (a, b) -> {as=a.get("file"); return true;} ); 
-//			Arrays.sort<Map<String,String>>(maps, new CustomSort());
-//			ahLog.toArray(aLog);
-/*
-			for(Entry<String,String> ent : hReg.entrySet()) {
-				pg.append("\n"+ent.getValue()+"&lt;"+ent.getKey()+"&gt;"+"<br>");
-			}
-*/
+			pg.append("\n");
 		} catch(Exception x) {
 			x.printStackTrace();
 		}
