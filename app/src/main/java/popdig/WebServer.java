@@ -272,7 +272,8 @@ System.out.println("form data");
 						"vp:desc '''\n"+
 						"''' .\n"+
 					"";
-					String surv = getSurveyDir()+"subscribe/";
+					String dd = ts.substring(0,8);
+					String surv = getSurveyDir()+"subscribe/"+dd+"/";
 					File fsurv = new File(surv);
 					if(!fsurv.exists()) fsurv.mkdirs();
 //					String fn = surv+"subscribe-"+ts+".rdf";
@@ -349,7 +350,7 @@ System.out.println("       "+fDir+" : "+ fDir.exists());
 				lDir.add(aDir[i]);
 			}
 
-			try {
+		try {
 
 			String[] sDir = lDir.toArray(new String[lDir.size()]);
 			Arrays.sort(sDir);
@@ -378,9 +379,9 @@ System.out.println("       "+fDir+" : "+ fDir.exists());
 			for(Entry<String,String> ent : hReg.entrySet()) {
 				pg.append("\n"+ent.getValue()+"&lt;"+ent.getKey()+"&gt;"+"<br>");
 			}
-			} catch(Exception x) {
-				x.printStackTrace();
-			}
+		} catch(Exception x) {
+			x.printStackTrace();
+		}
 
 			pg.append("</body></html>");
 			ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
