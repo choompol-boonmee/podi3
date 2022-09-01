@@ -352,6 +352,7 @@ System.out.println(rdf);
 			String[] sDir = lDir.toArray(new String[lDir.size()]);
 			Arrays.sort(sDir);
 //			Hashtable<String,String> hReg = new Hashtable<>();
+			int cnt = 0;
 			for(int i=0; i<sDir.length; i++) {
 System.out.println("DIR: "+ sDir[i]);
 				File fDay = new File(fsurv+"/"+sDir[i]);
@@ -378,7 +379,8 @@ System.out.println("    org: "+org);
 System.out.println("    mail: "+mail);
 					
 //					hReg.put(mail, name);
-					pg.append("\n"+mail+", "+name+", "+org+", "+fnm+"<br>");
+					cnt++;
+					pg.append("\n"+cnt+", "+mail+", "+name+", "+org+", "+fnm+"<br>");
 				}
 			}
 /*
