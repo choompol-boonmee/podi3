@@ -42,6 +42,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.*;
 import java.util.Map.Entry;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Comparator;
 
 public class WebServer {
 
@@ -353,6 +356,7 @@ System.out.println(rdf);
 			Arrays.sort(sDir);
 //			Hashtable<String,String> hReg = new Hashtable<>();
 			int cnt = 0;
+			List<Map<String,String>> ahLog = new ArrayList<>();
 			for(int i=0; i<sDir.length; i++) {
 System.out.println("DIR: "+ sDir[i]);
 				File fDay = new File(fsurv+"/"+sDir[i]);
@@ -374,15 +378,39 @@ System.out.println("    "+lLine.size());
 					if((i1=org.indexOf("'"))>0 && (i2=org.indexOf("'",i1+2))>0) { org = org.substring(i1+1, i2); }
 					String mail = lLine.get(7);
 					if((i1=mail.indexOf("'"))>0 && (i2=mail.indexOf("'",i1+2))>0) { mail = mail.substring(i1+1, i2); }
-System.out.println("    name: "+name);
-System.out.println("    org: "+org);
-System.out.println("    mail: "+mail);
+					Map<String,String> hLog = new HashMap();
+					hLog.put("name", name);
+					hLog.put("org", org);
+					hLog.put("mail", mail);
+					hLog.put("file", fnm);
+//System.out.println("    name: "+name);
+//System.out.println("    org: "+org);
+//System.out.println("    mail: "+mail);
 					
-//					hReg.put(mail, name);
+					ahLog.add(hLog);
 					cnt++;
-					pg.append("\n"+cnt+", "+mail+", "+name+", "+org+", "+fnm+"<br>");
+//					pg.append("\n"+cnt+", "+mail+", "+name+", "+org+", "+fnm+"<br>");
 				}
 			}
+			class CustomSort implements Comparator<Map<String,String>> {
+				public int compare(Map<String,String> a, Map<String,String> b) {
+					String fa = a.get("file");
+					String fb = b.get("file");
+					return fb.compareTo(fa);
+				}
+			}
+			Map<String,String>[] maps = ahLog.toArray(new HashMap[ahLog.size()]);
+			Arrays.sort(maps, new CustomSort());
+			for(int i=0; i<maps.length; i++) {
+				String mail = maps[i].get("mail");
+				String name = maps[i].get("name");
+				String org = maps[i].get("org");
+				String file = maps[i].get("file");
+				pg.append("\n"+(i+1)+", "+mail+", "+name+", "+org+", "+file+"<br>");
+			}
+//			Arrays.sort<Map<String,String>>(maps, (a, b) -> {as=a.get("file"); return true;} ); 
+//			Arrays.sort<Map<String,String>>(maps, new CustomSort());
+//			ahLog.toArray(aLog);
 /*
 			for(Entry<String,String> ent : hReg.entrySet()) {
 				pg.append("\n"+ent.getValue()+"&lt;"+ent.getKey()+"&gt;"+"<br>");
