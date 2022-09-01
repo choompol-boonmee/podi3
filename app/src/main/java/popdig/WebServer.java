@@ -345,14 +345,13 @@ System.out.println(rdf);
 				File fDir = new File(fsurv+"/"+aDir[i]);
 				if(!fDir.isDirectory()) continue;
 				lDir.add(aDir[i]);
-System.out.println("       "+fDir+" : "+ fDir.exists());
 			}
 
 		try {
 
 			String[] sDir = lDir.toArray(new String[lDir.size()]);
 			Arrays.sort(sDir);
-			Hashtable<String,String> hReg = new Hashtable<>();
+//			Hashtable<String,String> hReg = new Hashtable<>();
 			for(int i=0; i<sDir.length; i++) {
 System.out.println("DIR: "+ sDir[i]);
 				File fDay = new File(fsurv+"/"+sDir[i]);
@@ -363,7 +362,9 @@ System.out.println("  "+j+": "+ pth+" : "+ pth.toFile().exists());
 					if(!pth.toFile().exists()) continue;
 					Stream<String> sline = Files.lines(pth);
 					List<String> lLine = sline.collect(Collectors.toList());
+System.out.println("    "+lLine.size());
 					if(lLine.size()<8) continue;
+					String fnm = pth.toFile().getName();
 					int i1,i2;
 					// 5:name 6:org 7:email 8:time
 					String name = lLine.get(5);
@@ -372,13 +373,19 @@ System.out.println("  "+j+": "+ pth+" : "+ pth.toFile().exists());
 					if((i1=org.indexOf("'"))>0 && (i2=org.indexOf("'",i1+2))>0) { org = org.substring(i1+1, i2); }
 					String mail = lLine.get(7);
 					if((i1=mail.indexOf("'"))>0 && (i2=mail.indexOf("'",i1+2))>0) { mail = mail.substring(i1+1, i2); }
+System.out.println("    name: "+name);
+System.out.println("    org: "+org);
+System.out.println("    mail: "+mail);
 					
-					hReg.put(mail, name);
+//					hReg.put(mail, name);
+					pg.append("\n"+mail+", "+name+", "+org+", "+fnm+"<br>");
 				}
 			}
+/*
 			for(Entry<String,String> ent : hReg.entrySet()) {
 				pg.append("\n"+ent.getValue()+"&lt;"+ent.getKey()+"&gt;"+"<br>");
 			}
+*/
 		} catch(Exception x) {
 			x.printStackTrace();
 		}
