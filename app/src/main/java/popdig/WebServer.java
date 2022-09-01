@@ -348,6 +348,9 @@ System.out.println("       "+fDir+" : "+ fDir.exists());
 				if(!fDir.isDirectory()) continue;
 				lDir.add(aDir[i]);
 			}
+
+			try {
+
 			String[] sDir = lDir.toArray(new String[lDir.size()]);
 			Arrays.sort(sDir);
 			Hashtable<String,String> hReg = new Hashtable<>();
@@ -375,10 +378,14 @@ System.out.println("       "+fDir+" : "+ fDir.exists());
 			for(Entry<String,String> ent : hReg.entrySet()) {
 				pg.append("\n"+ent.getValue()+"&lt;"+ent.getKey()+"&gt;"+"<br>");
 			}
+			} catch(Exception x) {
+				x.printStackTrace();
+			}
 
 			pg.append("</body></html>");
 			ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
 			ex.getResponseSender().send(pg.toString());
+
 		}
 	};
 
