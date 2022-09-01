@@ -242,11 +242,14 @@ System.out.println("==== orid0: "+ orid0+" : "+ hOrg.get(orid0));
 			String eml = aMap.get(0).get("email");
 			String oid = aMap.get(0).get("c");
 			String curr = datefm.format(Calendar.getInstance().getTime());
+			if( (i1=oid.lastIndexOf("/"))<=0 ) return false;
+			String oid0 = oid.substring(i1+1).replace("#","-");
 			System.out.println("ORGID: "+ oid);
-			System.out.println("START: "+ start);
-			System.out.println("CURRE: "+ curr);
-			System.out.println("EXPIR: "+ end);
-			System.out.println("DIFF: "+ curr.compareTo(end));
+			System.out.println("ORGID: "+ oid0);
+//			System.out.println("START: "+ start);
+//			System.out.println("CURRE: "+ curr);
+//			System.out.println("EXPIR: "+ end);
+//			System.out.println("DIFF: "+ curr.compareTo(end));
 
 			if(curr.compareTo(end)>0) {
 				System.out.println("ลบสิทธิ์: "+ ftok.getAbsolutePath());
@@ -266,7 +269,7 @@ System.out.println("==== orid0: "+ orid0+" : "+ hOrg.get(orid0));
 				ex.getResponseHeaders().put(Headers.CONTENT_TYPE, type);
 				ex.getResponseSender().send(content);
 			} else {
-System.out.println("===== PATH: "+ pth);
+//System.out.println("===== PATH: "+ pth);
 				if(pth.equals("/save")) {
 					String res = "";
 					String orgid = "";
@@ -284,12 +287,18 @@ System.out.println("===== PATH: "+ pth);
 						if(res.length()>0) res+="\n";
 						res += k + "=" + v;
 					}
+					if(!oid0.equals(orgid)) {
+						ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+						ex.getResponseSender().send("");
+						return true;
+					}
 System.out.println("SAVE: "+ tok);
 System.out.println("TIME: "+ curr);
 					for(int i=0; i<aK.size(); i++) {
 						String sv = aK.get(i);
 						String va = aV.get(i);
-System.out.println("or:"+ orgid+" sv:"+aK.get(i)+" va:"+aV.get(i));
+//System.out.println("or0:"+ oid0+" or:"+ orgid+" sv:"+aK.get(i)+" va:"+aV.get(i));
+//						if(!oid0.equals(orgid)) continue;
 						File fDir = new File(sSub+"/data/"+orgid+"/"+sv+"/"+curr.substring(0,8));
 						if(!fDir.exists()) fDir.mkdirs();
 						File fDat = new File(sSub+"/data/"+orgid+"/"+sv+"/"+curr.substring(0,8)+"/"+curr+".ttl");
