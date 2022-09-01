@@ -600,6 +600,7 @@ System.out.println(rdf);
 		String d1 = d2.substring(0,d2.length()-2);
 		String d3 = vid.replace(":","-");
 		String dox = PopiangDigital.workDir + "/res/"+ d1+"/"+d2+"/"+d3+"/";
+System.out.println("SURVEY DIR: "+ dox);
 		return dox;
 	}
 
