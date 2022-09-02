@@ -306,10 +306,20 @@ System.out.println(rdf);
 					"<meta charset='UTF-8'>\n"+
 					"<meta name='viewport' content='width=device-width, initial-scale=1.0'>\n"+
 					"<link rel='stylesheet' href='https://unpkg.com/@picocss/pico@latest/css/pico.min.css'>\n"+
+"<script>"+
+"window.location.href='https://zoom.us/j/92277175505?pwd=WjBiMFFsVC9kK3VQRmhteHNidXRjUT09'"+
+"</script>"+
 					"</head>\n"+
 					"<body>\n"+
 					"<div>\n"+
 					"<h3>ขอบคุณที่ลงทะเบียนเข้าร่วมการสัมมนา DOING BUSINESS PORTAL</h3>\n"+
+"<h2>"+
+"<div> <a href="+
+"'https://zoom.us/j/92277175505?pwd=WjBiMFFsVC9kK3VQRmhteHNidXRjUT09'>"+
+"กดปุ่นนี้เพื่อเข้าร่วมการสัมมนา<br>"+
+"JOIN THE SEMINAR <br>"+
+"</a> </div>"+
+"</div>"+
 					"ท่านจะได้รับอีเมล์ข้อมูลรายละเอียดเกี่ยวกับงานสัมมนา<br>\n"+
 					"</div>\n"+
 					"<div>\n"+
