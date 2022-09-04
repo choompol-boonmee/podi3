@@ -52,7 +52,7 @@ public class WebServer {
 
 	SimpleDateFormat datefm = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS");
 	SimpleDateFormat datetm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	public WebDataAccessHandler access;
+	public WebDataAccessHandler access, dobiz;
 
 	String ht2 = 
 		"<head>\n"+
@@ -778,6 +778,8 @@ System.out.println("WebDir PAGE: "+ page);
 				.setDirectoryListingEnabled(true));
 		access = new WebDataAccessHandler();
 		path.addPrefixPath("/acc", access);
+		dobiz = new WebDataAccessHandler();
+		path.addPrefixPath("/dobiz", dobiz);
 
 		// static web page at root '/'
 		PathResourceManager rt = new PathResourceManager(Paths.get(page), 100) {

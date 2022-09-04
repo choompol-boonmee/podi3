@@ -207,11 +207,43 @@ System.out.println("==== orid0: "+ orid0+" : "+ hOrg.get(orid0));
 		return "";
 	}
 
+	boolean saraban(HttpServerExchange ex) throws Exception {
+		String rel = ex.getRelativePath();
+System.out.println("SARABAN: "+ rel);
+		if(!rel.startsWith("/saraban/")) return false;
+		String no = rel.substring(9);
+		
+		String type = "text/html";
+		String cont = "สารบรรณ: "+ no;
+		File fdoc = new File(sSub+"/saraban/"+no.replace("/","_")+".pdf");
+		if(!fdoc.exists()) return false;
+
+		if (ex.isInIoThread()) { ex.dispatch(this); return true; }
+
+		ex.startBlocking();
+		String tp = "application/pdf";
+		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, tp);
+		final OutputStream outputStream = ex.getOutputStream();
+		final InputStream inputStream = new FileInputStream(fdoc);
+		byte[] buf = new byte[8192];
+		int c;
+		while ((c = inputStream.read(buf, 0, buf.length)) > 0) {
+		    outputStream.write(buf, 0, c);
+		    outputStream.flush();
+		}
+		outputStream.close();
+		inputStream.close();
+
+		return true;
+	}
+
 	boolean access(HttpServerExchange ex) throws Exception {
 		String rel = ex.getRelativePath();
 //System.out.println("1."+rel);
 		if(!rel.startsWith("/")) return false;
 //System.out.println("2."+rel);
+		if(saraban(ex)) return true;
+
 		int i1 = rel.indexOf("/", 1);
 		if(i1!=18) return false;
 		String tok = rel.substring(1,i1);
@@ -336,37 +368,6 @@ System.out.println("fDir: "+ fDir);
 					ex.getResponseSender().send(res);
 				} else if(pth.equals("/read")) {
 					readValue(ex);
-/*
-					String orgid = "";
-					for(Entry<String,Deque<String>> ent : ex.getQueryParameters().entrySet()) {
-						String k = ent.getKey();
-						String v = ent.getValue().getFirst();
-						if(k.equals("orid")) {
-							orgid = v;
-							break;
-						}
-					}
-					System.out.println("READING: "+orgid);
-					File fDir = new File(sSub+"/data/"+orgid);
-					String ln = "";
-					if(fDir.exists()) {
-						File[] flist = fDir.listFiles();
-						for(int i=0; i<flist.length; i++) {
-							File fDat = new File(flist[i]+"/value.txt");
-							String name = flist[i].getName();
-							if(!fDat.exists()) continue;
-							Path filePath = Path.of(fDat.getAbsolutePath());
-							String content = Files.readString(filePath);
-							content = content.trim();
-System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
-System.out.println("     "+name+" = ["+ content+"]");
-							if(ln.length()>0) ln += "\n";
-							ln += name+"="+content;
-						}
-					}
-					ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
-					ex.getResponseSender().send(ln);
-*/
 				}
 			}
 			return true;
