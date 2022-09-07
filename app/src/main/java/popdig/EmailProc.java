@@ -326,7 +326,7 @@ System.out.println("4.2 read msg");
 			propImap.put("mail.imaps.ssl.trust", "*");
 			Session session = Session.getInstance(propImap, null);
 			Store store = session.getStore("imap");
-// System.out.println("imap:"+PopiangDigital.sImap+" em:"+PopiangDigital.sRecvEmail+" pw:"+PopiangDigital.sPassWord);
+ System.out.println("imap:"+PopiangDigital.sImap+" em:"+PopiangDigital.sRecvEmail+" pw:"+PopiangDigital.sPassWord);
 //			store.connect(imap, email, pass);
 			store.connect(PopiangDigital.sImap, PopiangDigital.sRecvEmail, PopiangDigital.sPassWord);
 			folder = (IMAPFolder) store.getFolder("Inbox");
@@ -340,7 +340,7 @@ System.out.println("4.2 read msg");
 		} catch(Exception x) {
 //			log.info(x);
 			System.out.println("ER-01: "+ x);
-//			x.printStackTrace();
+			x.printStackTrace();
 			folder = null;
 		}
 		return folder;
