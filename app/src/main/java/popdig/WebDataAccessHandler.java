@@ -97,6 +97,40 @@ public class WebDataAccessHandler implements HttpHandler {
 		}
 	}
 
+	void orgState0(HttpServerExchange ex) throws Exception {
+		String ln = "";
+		File fDir = new File(sSub+"/data/");
+		if(fDir.exists()) {
+			File[] flist = fDir.listFiles();
+			for(int i=0; i<flist.length; i++) {
+				String or = flist[i].getName();
+				if(!or.startsWith("or-")) continue;
+				System.out.println((i+1)+" : "+ flist[i].getName());
+				int count=0,elec=0,p66=0,p67=0,p68=0,pro=0;
+				File[] flist2 = flist[i].listFiles();
+				for(int j=0; j<flist2.length; j++) {
+					String nm = flist2[j].getName();
+					if(nm.endsWith("_count")) count++;
+					else if(nm.endsWith("_elec")) elec++;
+					else if(nm.endsWith("_p66")) p66++;
+					else if(nm.endsWith("_p67")) p67++;
+					else if(nm.endsWith("_p68")) p68++;
+					else if(nm.endsWith("_pro")) pro++;
+					System.out.println("  "+(j+1)+" : "+ flist2[j].getName());
+				}
+				ln += "\n"+or+"-count="+count;
+				ln += "\n"+or+"-elec="+elec;
+				ln += "\n"+or+"-p66="+p66;
+				ln += "\n"+or+"-p67="+p67;
+				ln += "\n"+or+"-p68="+p68;
+				ln += "\n"+or+"-pro="+pro;
+			}
+System.out.println("ORG STATE0: "+ln);
+		}
+		
+		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+		ex.getResponseSender().send(ln);
+	}
 	void readValue(HttpServerExchange ex) throws Exception {
 
 		String orgid = "";
@@ -209,7 +243,6 @@ System.out.println("==== orid0: "+ orid0+" : "+ hOrg.get(orid0));
 
 	boolean saraban(HttpServerExchange ex) throws Exception {
 		String rel = ex.getRelativePath();
-System.out.println("SARABAN: "+ rel);
 		if(!rel.startsWith("/saraban/")) return false;
 		String no = rel.substring(9);
 		
@@ -366,6 +399,8 @@ System.out.println("fDir: "+ fDir);
 					}
 					ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
 					ex.getResponseSender().send(res);
+				} else if(pth.equals("/org-state0")) {
+					orgState0(ex);
 				} else if(pth.equals("/read")) {
 					readValue(ex);
 				}
@@ -482,6 +517,7 @@ System.out.println("fDir: "+ fDir);
 		if(access(ex)) return;
 		String rel = ex.getRelativePath();
 		if(rel.startsWith("/read")) readValue(ex);
+		if(rel.startsWith("/org-state0")) orgState0(ex);
 
 		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
 		ex.getResponseSender().send("<script>window.location.href='/';</script>");
