@@ -154,8 +154,8 @@ System.out.println("ORG STATE0: "+ln);
 				Path filePath = Path.of(fDat.getAbsolutePath());
 				String content = Files.readString(filePath);
 				content = content.trim();
-//System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
-//System.out.println("     "+name+" = ["+ content+"]");
+System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
+System.out.println("     "+name+" = ["+ content+"]");
 				if(ln.length()>0) ln += "\n";
 				ln += name+"="+content;
 			}

@@ -1168,15 +1168,18 @@ System.out.println("sel0: "+ sel0);
 		String rdfs = PopiangDigital.workDir+"/rdf/";
 		int ln = prfx.length();
 		File fdir = new File(rdfs+prfx);
-		String mx = "00";
+		String mx = "00", mx2="";
 //System.out.println("RDF MAX: "+ fdir);
-		for(String nm : fdir.list()) {
-//System.out.println("    NAM: "+ nm);
-			String ord = nm.substring(ln,ln+2);
-			if(!ord.matches("[0-9A-Z][0-9A-Z]")) continue;
-			if(ord.compareTo(mx)>0) mx = ord;
+		if(fdir!=null) {
+			for(String nm : fdir.list()) {
+				String ord = nm.substring(ln,ln+2);
+				if(!ord.matches("[0-9A-Z][0-9A-Z]")) continue;
+				if(ord.compareTo(mx)>0) mx = ord;
+			}
+			mx2 = PopiangUtil.nextMax(mx);
+		} else {
+			mx2 = "01";
 		}
-		String mx2 = PopiangUtil.nextMax(mx);
 		return mx2;
 	}
 
