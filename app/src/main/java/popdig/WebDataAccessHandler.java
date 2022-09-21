@@ -133,19 +133,24 @@ System.out.println("ORG STATE0: "+ln);
 	}
 	void readValue(HttpServerExchange ex) throws Exception {
 
+		String[] orgids = null;
 		String orgid = "";
 		for(Entry<String,Deque<String>> ent : ex.getQueryParameters().entrySet()) {
 			String k = ent.getKey();
 			String v = ent.getValue().getFirst();
 			if(k.equals("orid")) {
+				orgids = v.split("_");
 				orgid = v;
 				break;
 			}
 		}
 		System.out.println("READING: "+orgid);
-		File fDir = new File(sSub+"/data/"+orgid);
+
 		String ln = "";
 		StringBuffer bln = new StringBuffer();
+		for(int j=0; j<orgids.length; j++) {
+			orgid = orgids[j];
+		File fDir = new File(sSub+"/data/"+orgid);
 		if(fDir.exists()) {
 			File[] flist = fDir.listFiles();
 			for(int i=0; i<flist.length; i++) {
@@ -155,7 +160,7 @@ System.out.println("ORG STATE0: "+ln);
 				Path filePath = Path.of(fDat.getAbsolutePath());
 				String content = Files.readString(filePath);
 				content = content.trim();
-System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
+//System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
 //System.out.println("     "+name+" = ["+ content+"]");
 				if(bln.length()>0) bln.append("\n");
 				bln.append(name+"="+content);
@@ -164,6 +169,8 @@ System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
 				ln += name+"="+content;
 			}
 		}
+		}
+
 		ln = bln.toString();
 //System.out.println("=================== LN: "+ln);
 		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
