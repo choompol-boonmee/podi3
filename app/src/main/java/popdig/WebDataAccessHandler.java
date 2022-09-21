@@ -160,6 +160,7 @@ System.out.println("     "+name+" = ["+ content+"]");
 				ln += name+"="+content;
 			}
 		}
+System.out.println("=================== LN: "+ln);
 		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
 		ex.getResponseSender().send(ln);
 	}
