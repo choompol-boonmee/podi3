@@ -155,7 +155,7 @@ System.out.println("ORG STATE0: "+ln);
 				Path filePath = Path.of(fDat.getAbsolutePath());
 				String content = Files.readString(filePath);
 				content = content.trim();
-//System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
+System.out.println(i+": "+ fDat+" : "+content+" name:"+ name);
 //System.out.println("     "+name+" = ["+ content+"]");
 				if(bln.length()>0) bln.append("\n");
 				bln.append(name+"="+content);
@@ -165,7 +165,7 @@ System.out.println("ORG STATE0: "+ln);
 			}
 		}
 		ln = bln.toString();
-System.out.println("=================== LN: "+ln);
+//System.out.println("=================== LN: "+ln);
 		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
 		ex.getResponseSender().send(ln);
 	}
