@@ -576,6 +576,8 @@ System.out.println("fDir: "+ fDir);
 				System.out.println("OS NAME: "+ osn);
 				File bat = new File(PopiangDigital.workDir+"/vibash.bat");			
 				if(osn.startsWith("Window")) {
+				} else if(osn.startsWith("Linux")) {
+					bat = new File(PopiangDigital.workDir+"/vibash.sh");
 				} else {
 				}
 				File fo = new File(imgd+"/"+tok+".jpg");
