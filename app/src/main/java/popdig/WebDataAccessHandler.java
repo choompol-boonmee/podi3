@@ -572,11 +572,17 @@ System.out.println("fDir: "+ fDir);
 				File imgd = new File(PopiangDigital.workDir+"/res/cam1/"+dd+"/"+tok);
 				if(!imgd.exists()) imgd.mkdirs();
 
+				String osn = System.getProperty("os.name");
+				System.out.println("OS NAME: "+ osn);
 				File bat = new File(PopiangDigital.workDir+"/vibash.bat");			
+				if(osn.startsWith("Window")) {
+				} else {
+				}
 				File fo = new File(imgd+"/"+tok+".jpg");
 				File lab = new File(imgd+"/exp/labels/"+tok+".txt");
 
 				System.out.println("file:" + fo.getAbsolutePath());
+				
 				FileOutputStream fout = new FileOutputStream(fo);
 				fout.write(buf);
 				fout.close();
