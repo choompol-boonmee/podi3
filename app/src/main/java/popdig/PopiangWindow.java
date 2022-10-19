@@ -1140,14 +1140,15 @@ System.out.println("show children 7:");
 
 	String getNodePrefix0(DefaultMutableTreeNode node) {
 		String sele = node.toString();
+		sele = sele.replace("\\","/");
 		String rdfs = PopiangDigital.workDir+"/rdf/";
 		String sel0 = sele.substring(rdfs.length());
-//System.out.println("sele: "+ sele);
-//System.out.println("rdfs: "+ rdfs);
+System.out.println("sele: "+ sele);
+System.out.println("rdfs: "+ rdfs);
 		int i1 = sel0.indexOf("/");
-//System.out.println(" i: "+ i1);
+System.out.println(" i: "+ i1);
 		if(i1>0) sel0 = sel0.substring(0,i1);
-//System.out.println("sel0: "+ sel0);
+System.out.println("sel0: "+ sel0);
 		return sel0;
 	}
 	String getNodePrefix1(DefaultMutableTreeNode node) {
@@ -1164,7 +1165,7 @@ System.out.println("sel0: "+ sel0);
 	}
 
 	String getRdfIdMax0(String prfx) {
-//System.out.println("prfx: "+ prfx);
+System.out.println("prfx: "+ prfx);
 		String rdfs = PopiangDigital.workDir+"/rdf/";
 		int ln = prfx.length();
 		File fdir = new File(rdfs+prfx);
@@ -1218,6 +1219,8 @@ System.out.println("sel0: "+ sel0);
 		if(node==null) return;
 		String rdfs = PopiangDigital.workDir+"/rdf/";
 		String prfx = getNodePrefix0(node);
+System.out.println("Node Prefix: " + prfx);
+		
 		String mx2 = getRdfIdMax0(prfx);
 		String fnm = prfx+mx2;
 

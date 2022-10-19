@@ -19,6 +19,7 @@ public class AddRdfImageAction extends PopupAction {
 	}
     public void action() {
 		String sp = ""+tfinf.path;
+		sp = sp.replace("\\","/");
 		if(!sp.endsWith(".ttl")) return;
 
 		Transferable cnt = Toolkit.getDefaultToolkit()
@@ -44,6 +45,7 @@ public class AddRdfImageAction extends PopupAction {
 			g2.drawLine(0,0,100,100);
 			g2.drawImage(img, 0,0,wd,hg, 0,0,wd,hg, null);
 			g2.dispose();
+			
 			sp = sp.substring(0,sp.lastIndexOf("/rdf"))
 				+"/res/"+dirnm+"/"+rdfnm+"/"+imfn+".jpg";
 			imf = "file:"+dirnm+"/"+rdfnm+"/"+imfn+".jpg";

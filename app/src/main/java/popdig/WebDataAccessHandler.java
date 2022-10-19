@@ -51,6 +51,7 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.*;
 import org.apache.jena.query.*;
 import org.apache.commons.io.FileUtils;
+import javax.xml.bind.DatatypeConverter;
 
 public class WebDataAccessHandler implements HttpHandler {
 	boolean bInit = false;
@@ -92,8 +93,10 @@ public class WebDataAccessHandler implements HttpHandler {
 			}
 			
 			bInit = true;
+		} catch(IOException z) {
+			System.out.println("1.IO ERROR");
 		} catch(Exception z) {
-			z.printStackTrace();
+			System.out.println("2.ERROR");
 		}
 	}
 
@@ -503,6 +506,7 @@ System.out.println("fDir: "+ fDir);
 		}
 		return false;
 	}
+	
 	boolean sendFile(HttpServerExchange ex) throws Exception {
 		String rel = ex.getRelativePath();
 		String sub = PopiangDigital.sSub;
@@ -522,12 +526,93 @@ System.out.println("fDir: "+ fDir);
 		}
 		return false;
 	}
+	
+	boolean getCam1(HttpServerExchange ex) throws Exception {
+		String rel = ex.getRelativePath();
+		System.out.println("============ CAM1 :" + rel);
+		if(!rel.equals("/cam1")) return false;
+		
+		if (ex.isInIoThread()) { ex.dispatch(this); return true; }
+		ex.startBlocking();
+		ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+		
+		BufferedReader reader = null;
+		StringBuilder builder = new StringBuilder( );
+
+		try {
+			reader = new BufferedReader( new InputStreamReader( ex.getInputStream( ) ) );
+			String line;
+			while( ( line = reader.readLine( ) ) != null ) {
+				builder.append( line );
+			}
+		} catch( IOException e ) {
+			e.printStackTrace( );
+			ex.getResponseSender().send("ER:"+e);
+			return true;
+		} finally {
+			if( reader != null ) {
+				try {
+					reader.close( );
+				} catch( IOException e ) {
+					e.printStackTrace( );
+				}
+			}
+		}
+		String body = builder.toString( );
+		String pref = "data:image/jpeg;base64,";
+		if(body.startsWith(pref)) {
+			body = body.substring(pref.length());
+			
+			Calendar c = Calendar.getInstance();
+			String tok = datefm.format(c.getTime());
+			try {
+				byte[] buf = DatatypeConverter.parseBase64Binary(body);
+				System.out.println("body:" + body.length() + " l:" + buf.length);
+				String dd = tok.substring(0,8);
+				File imgd = new File(PopiangDigital.workDir+"/res/cam1/"+dd+"/"+tok);
+				if(!imgd.exists()) imgd.mkdirs();
+
+				File bat = new File(PopiangDigital.workDir+"/vibash.bat");			
+				File fo = new File(imgd+"/"+tok+".jpg");
+				File lab = new File(imgd+"/exp/labels/"+tok+".txt");
+
+				System.out.println("file:" + fo.getAbsolutePath());
+				FileOutputStream fout = new FileOutputStream(fo);
+				fout.write(buf);
+				fout.close();
+				
+				System.out.println("bat:"+bat.getAbsolutePath()+ " "+bat.exists());
+				System.out.println("fo:"+fo.getAbsolutePath()+ " "+fo.exists());
+				System.out.println("dir:"+imgd.getAbsolutePath()+ " "+imgd.exists());
+				
+				String cm = bat.getAbsolutePath()+ " "+ fo.getAbsolutePath()+" "+imgd.getAbsolutePath();
+				cm = cm.replace("\\","/");
+				System.out.println(cm);
+				Process prc = Runtime.getRuntime().exec(cm);
+				int exit = prc.waitFor();
+				System.out.println("lab:"+lab.getAbsolutePath()+ " "+lab.exists());
+				if(lab.exists()) {
+					Path filePath = Path.of(lab.getAbsolutePath());
+					String content = Files.readString(filePath);
+					ex.getResponseSender().send(content);
+					return true;
+				}
+			} catch(Exception x) {
+				x.printStackTrace();
+			}
+		}
+		ex.getResponseSender().send("OK");
+		return true;
+	}
+	
 	@Override
 	public void handleRequest(final HttpServerExchange ex) throws Exception {
 		init();
 		if(sendFile(ex)) return;
 		if(accessRequest(ex)) return;
 		if(access(ex)) return;
+		if(getCam1(ex)) return;
+
 		String rel = ex.getRelativePath();
 		if(rel.startsWith("/read")) readValue(ex);
 		if(rel.startsWith("/org-state0")) orgState0(ex);
