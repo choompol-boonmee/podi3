@@ -1178,7 +1178,7 @@ System.out.println("REPLY: "+ rp);
 						aReply.add(exam);
 					} else {
 						StringBuffer buf = new StringBuffer();
-						for(int j=1; j<10; j++) {
+						for(int j=1; j<30; j++) {
 							String qx = readinfo(own, "QUIZ"+j);
 							if(qx==null || qx.length()==0) break;
 							String as = readinfo(from, "EXAM"+j);
