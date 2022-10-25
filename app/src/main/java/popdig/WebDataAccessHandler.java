@@ -52,6 +52,12 @@ import org.apache.jena.vocabulary.*;
 import org.apache.jena.query.*;
 import org.apache.commons.io.FileUtils;
 import javax.xml.bind.DatatypeConverter;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.URI;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+
 
 public class WebDataAccessHandler implements HttpHandler {
 	boolean bInit = false;
@@ -592,12 +598,24 @@ System.out.println("fDir: "+ fDir);
 				System.out.println("bat:"+bat.getAbsolutePath()+ " "+bat.exists());
 				System.out.println("fo:"+fo.getAbsolutePath()+ " "+fo.exists());
 				System.out.println("dir:"+imgd.getAbsolutePath()+ " "+imgd.exists());
-				
+
+				String url = "http://localhost:20000/xxx?img="+fo.getAbsolutePath()
+					+"&out="+imgd.getAbsolutePath();
+				url = url.replace("\\","/");
+				System.out.println("URL:"+ url);
+				HttpClient client = HttpClient.newHttpClient();
+				HttpRequest request = HttpRequest.newBuilder()
+				  .uri(URI.create(url))
+				  .build();
+				HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+				System.out.println(response.body());
+/*				
 				String cm = bat.getAbsolutePath()+ " "+ fo.getAbsolutePath()+" "+imgd.getAbsolutePath();
 				cm = cm.replace("\\","/");
 				System.out.println(cm);
 				Process prc = Runtime.getRuntime().exec(cm);
 				int exit = prc.waitFor();
+*/
 				System.out.println("lab:"+lab.getAbsolutePath()+ " "+lab.exists());
 				if(lab.exists()) {
 					Path filePath = Path.of(lab.getAbsolutePath());
