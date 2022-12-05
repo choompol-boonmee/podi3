@@ -306,9 +306,9 @@ System.out.println(rdf);
 					"<meta charset='UTF-8'>\n"+
 					"<meta name='viewport' content='width=device-width, initial-scale=1.0'>\n"+
 					"<link rel='stylesheet' href='https://unpkg.com/@picocss/pico@latest/css/pico.min.css'>\n"+
-"<script>"+
-"window.location.href='https://zoom.us/j/92277175505?pwd=WjBiMFFsVC9kK3VQRmhteHNidXRjUT09'"+
-"</script>"+
+//"<script>"+
+//"window.location.href='https://zoom.us/j/92277175505?pwd=WjBiMFFsVC9kK3VQRmhteHNidXRjUT09'"+
+//"</script>"+
 					"</head>\n"+
 					"<body>\n"+
 					"<div>\n"+
