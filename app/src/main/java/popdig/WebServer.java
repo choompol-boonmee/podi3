@@ -315,7 +315,8 @@ System.out.println(rdf);
 					"<h3>ขอบคุณที่ลงทะเบียนเข้าร่วมการสัมมนา DOING BUSINESS PORTAL</h3>\n"+
 "<h2>"+
 "<div> <a href="+
-"'https://zoom.us/j/92277175505?pwd=WjBiMFFsVC9kK3VQRmhteHNidXRjUT09'>"+
+"'https://dga.tueng.org/seminar-join.html'>"+
+//"'https://zoom.us/j/92277175505?pwd=WjBiMFFsVC9kK3VQRmhteHNidXRjUT09'>"+
 "กดปุ่นนี้เพื่อเข้าร่วมการสัมมนา<br>"+
 "JOIN THE SEMINAR <br>"+
 "</a> </div>"+
