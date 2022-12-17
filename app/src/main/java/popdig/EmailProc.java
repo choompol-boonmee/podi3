@@ -1322,6 +1322,11 @@ log.info("SEND TO\n"+buf.toString()+"\n");
 				Arrays.sort(ida);
 				
 				StringBuilder buf = new StringBuilder();
+				buf.append("ID:NAME:EMAIL");
+				for(int j=1; j<=mx; j++) {
+					buf.append("_|_"+txt+j);
+				}
+				
 				for(String id: ida) {
 					String em = id2em.get(id);
 					String nm = readinfo(em, "NAME");
