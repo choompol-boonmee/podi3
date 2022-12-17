@@ -1326,6 +1326,7 @@ log.info("SEND TO\n"+buf.toString()+"\n");
 				for(int j=1; j<=mx; j++) {
 					buf.append("_|_"+txt+j);
 				}
+				buf.append("\n");
 				
 				for(String id: ida) {
 					String em = id2em.get(id);
