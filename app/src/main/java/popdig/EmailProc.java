@@ -1331,6 +1331,7 @@ System.out.println("id: "+ id+" : "+em+" : mx: "+ mx);
 					buf.append(em+": "+id+" : "+nm+" : ");
 					for(int j=1; j<=mx; j++) {
 						String dt = readinfo(em, txt+j);
+						dt = dt.replace("\n","").replace("\r","");
 						buf.append("_|_"+dt);
 					}
 					buf.append("\n");
