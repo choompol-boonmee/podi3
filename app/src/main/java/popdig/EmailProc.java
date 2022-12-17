@@ -390,12 +390,12 @@ System.out.println("4.2 read msg");
 			Object content = msg.getContent();
 			if(content instanceof Multipart) {
 				Multipart mp = (Multipart) content;
-System.out.println("2.---- multiple parts");
+//System.out.println("2.---- multiple parts");
 				parseMultipart(mp, hsProp, hsText, hbStrm);
 			}
 			else if(content instanceof String) {
 				String txt = (String) content;
-System.out.println("1.--- String");
+//System.out.println("1.--- String");
 				hsText.get("TXT").add(txt);
 /*
 			} else if(content instanceof BASE64DecoderStream) {
@@ -1292,6 +1292,50 @@ log.info("SEND TO\n"+buf.toString()+"\n");
 log.info("SEND TO\n"+buf.toString()+"\n");
 					hsProp.put("REPLY", buf.toString());
 				}
+			} else {
+				aReply.add("NOT ALLOWED");
+			}
+		} else if(subj.startsWith("MARK")) {
+			if(own.equals(from)) {
+				if(txt==null) txt = "CLIP";
+				String[] memb = fUser.list();
+				Map<String,String> id2em = new HashMap<>();
+				List<String> ids = new ArrayList<>();
+				int mx = 0;
+				for(int i=0; i<memb.length; i++) {
+					String em = memb[i];
+					if(!empat.matcher(em).find()) continue;
+					String id = readinfo(em, "STDID");
+					String nm = readinfo(em, "NAME");
+					if(id==null||id.length()==0||nm==null||nm.length()==0) continue;
+					for(int mm=mx+1; mm<20;mm++) {
+						String x = readinfo(em, txt+mm);
+						System.out.println(" x:"+txt+"-"+mm+" : "+readinfo(em, txt+mm));
+						if(x==null || x.length()==0) {
+							mx = mm -1;
+							break;
+						}
+					}
+System.out.println("id: "+ id+" : "+em+" : mx: "+ mx);
+					id2em.put(id,em);
+					ids.add(id);
+				}
+				String[] ida = ids.toArray(new String[ids.size()]);
+				Arrays.sort(ida);
+				
+				StringBuilder buf = new StringBuilder();
+				for(String id: ida) {
+					String em = id2em.get(id);
+					String nm = readinfo(em, "NAME");
+					if(id==null || id.length()==0 || nm==null || nm.length()==0) continue;
+					buf.append(em+": "+id+" : "+nm+" : ");
+					for(int j=1; j<=mx; j++) {
+						String dt = readinfo(em, txt+j);
+						buf.append("_|_"+dt);
+					}
+					buf.append("\n");
+				}
+				aReply.add(txt+"\n"+buf);
 			} else {
 				aReply.add("NOT ALLOWED");
 			}
