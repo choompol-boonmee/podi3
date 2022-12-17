@@ -1310,13 +1310,11 @@ log.info("SEND TO\n"+buf.toString()+"\n");
 					if(id==null||id.length()==0||nm==null||nm.length()==0) continue;
 					for(int mm=mx+1; mm<20;mm++) {
 						String x = readinfo(em, txt+mm);
-						System.out.println(" x:"+txt+"-"+mm+" : "+readinfo(em, txt+mm));
 						if(x==null || x.length()==0) {
 							mx = mm -1;
 							break;
 						}
 					}
-System.out.println("id: "+ id+" : "+em+" : mx: "+ mx);
 					id2em.put(id,em);
 					ids.add(id);
 				}
@@ -1328,7 +1326,7 @@ System.out.println("id: "+ id+" : "+em+" : mx: "+ mx);
 					String em = id2em.get(id);
 					String nm = readinfo(em, "NAME");
 					if(id==null || id.length()==0 || nm==null || nm.length()==0) continue;
-					buf.append(em+": "+id+" : "+nm+" : ");
+					buf.append(id+":"+nm+":"+em);
 					for(int j=1; j<=mx; j++) {
 						String dt = readinfo(em, txt+j);
 						dt = dt.replace("\n","").replace("\r","");
