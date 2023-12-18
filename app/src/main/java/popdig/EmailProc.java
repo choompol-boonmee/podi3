@@ -1083,6 +1083,7 @@ System.out.println("reply: "+ subj);
 			} else {
 				aReply.add("โปรดใส่ อีเมล์แอดเดรส หลัง '<=' ");
 			}
+			System.out.println("sub:" + subj + " from:"+ from+ " own:"+own)
 		}
 		if((i1=subj.indexOf(":"))>0) {
 			txt = subj.substring(i1+1);

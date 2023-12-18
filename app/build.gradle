@@ -30,6 +30,9 @@ jar.doLast {
 
 repositories {
     mavenCentral()
+//	maven {
+//		url "https://repo.osgeo.org/repository/release/"
+//	}
 }
 
 dependencies {
@@ -69,6 +72,8 @@ dependencies {
     implementation group: 'org.keycloak', name: 'keycloak-saml-core', version: '15.0.2'
 
 	implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.3'
+	
+//	implementation group: 'org.geotools', name: 'gt-shapefile', version: '22.2'
 
     testImplementation'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testImplementation 'org.assertj:assertj-core:3.20.2'
